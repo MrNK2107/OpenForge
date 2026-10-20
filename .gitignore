@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# night-run: large binaries / tool dirs
+public/assets/*.glb
+.kilo/
