@@ -41,7 +41,7 @@ export function Navbar() {
     <nav className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
       {!isSupabaseConfigured && (
         <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs sm:text-sm text-center px-4 py-1.5">
-          <strong className="font-semibold">Demo mode</strong> &middot; Supabase is not configured, so you are seeing sample data. Sign-in and edits are disabled.
+          <strong className="font-semibold">Demo mode</strong>{' · '}Supabase is not configured, so you are seeing sample data. Sign-in and edits are disabled.
         </div>
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

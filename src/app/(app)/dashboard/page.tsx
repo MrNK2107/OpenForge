@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Plus, GitBranch, Users, FileText, Star } from 'lucide-react';
 import type { User, Project } from '@/types';
 import { fetchJson, fetchArray } from '@/lib/fetch-json';
+import { plural } from '@/components/TagChip';
+import { SignInPrompt } from '@/components/SignInPrompt';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -35,16 +37,7 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to access your dashboard.</p>
-          <Link href="/api/auth/github" className="text-violet-600 hover:text-violet-700 font-medium">
-            Sign in with GitHub →
-          </Link>
-        </div>
-      </div>
-    );
+    return <SignInPrompt title="Your dashboard" message="Sign in to see the projects you own and contribute to." />;
   }
 
   return (
@@ -119,7 +112,7 @@ export default function DashboardPage() {
                   <p className="text-gray-500 text-sm line-clamp-2 mb-3">{project.description}</p>
                   <div className="flex items-center text-sm text-gray-500">
                     <Users className="w-4 h-4 mr-1" />
-                    {project.members?.length || 0} members
+                    {plural(project.members?.length || 0, 'member')}
                     {project.github_repo_url && (
                       <span className="ml-3 text-violet-600">GitHub linked</span>
                     )}

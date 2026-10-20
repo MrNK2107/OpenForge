@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Bell, Check, Users, MessageSquare, GitPullRequest, Star } from 'lucide-react';
 import type { Notification, User } from '@/types';
 import { fetchJson, fetchArray } from '@/lib/fetch-json';
+import { SignInPrompt } from '@/components/SignInPrompt';
 
 export default function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -49,16 +49,7 @@ export default function NotificationsPage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to view notifications.</p>
-          <Link href="/api/auth/github" className="text-violet-600 hover:text-violet-700 font-medium">
-            Sign in with GitHub →
-          </Link>
-        </div>
-      </div>
-    );
+    return <SignInPrompt title="Notifications" message="Sign in to see join requests, matches and project updates." />;
   }
 
   const unreadCount = notifications.filter(n => !n.read).length;

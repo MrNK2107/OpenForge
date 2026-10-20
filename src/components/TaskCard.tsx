@@ -1,6 +1,6 @@
 'use client';
 
-import { Task, User } from '@/types';
+import { Task } from '@/types';
 import { MessageSquare, Calendar, User as UserIcon } from 'lucide-react';
 
 interface TaskCardProps {

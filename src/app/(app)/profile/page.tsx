@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, User, Mail, Clock, Briefcase } from 'lucide-react';
+import { Save, Clock, Briefcase } from 'lucide-react';
 import type { User as UserType, Tag } from '@/types';
 import { fetchJson, fetchArray } from '@/lib/fetch-json';
+import { SignInPrompt } from '@/components/SignInPrompt';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<UserType | null>(null);
@@ -85,13 +86,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Please sign in to view your profile.</p>
-        </div>
-      </div>
-    );
+    return <SignInPrompt title="Your profile" message="Sign in to manage your skills, roles and availability." />;
   }
 
   return (

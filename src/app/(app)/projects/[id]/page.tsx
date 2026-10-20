@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Users, Star, GitBranch, ExternalLink, Plus, Settings, MessageSquare } from 'lucide-react';
+import { Users, Star, GitBranch, ExternalLink, Settings } from 'lucide-react';
 import type { Project, Task } from '@/types';
 import { fetchJson, fetchArray } from '@/lib/fetch-json';
+import { TagChip, plural } from '@/components/TagChip';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -110,13 +111,7 @@ export default function ProjectDetailPage() {
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mt-4">
             {(project.tags as unknown as Array<{ id: string; name: string; color: string }>)?.map((tag) => (
-              <span
-                key={tag.id}
-                className="px-3 py-1 rounded-full text-sm"
-                style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
-              >
-                {tag.name}
-              </span>
+              <TagChip key={tag.id} name={tag.name} color={tag.color} />
             ))}
             {project.difficulty && (
               <span className="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700">
@@ -133,7 +128,7 @@ export default function ProjectDetailPage() {
           {/* Stats */}
           <div className="flex items-center space-x-6 mt-4 text-sm text-gray-500">
             <span className="flex items-center"><Star className="w-4 h-4 mr-1" /> {project.stars_count || 0} stars</span>
-            <span className="flex items-center"><Users className="w-4 h-4 mr-1" /> {project.members?.length || 0} members</span>
+            <span className="flex items-center"><Users className="w-4 h-4 mr-1" /> {plural(project.members?.length || 0, 'member')}</span>
             <span className="flex items-center"><GitBranch className="w-4 h-4 mr-1" /> {taskStats.total} tasks</span>
           </div>
         </div>

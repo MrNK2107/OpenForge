@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Zap, Clock, Users, ExternalLink } from 'lucide-react';
 import type { User } from '@/types';
-import { MatchCard } from '@/components/MatchCard';
 import { fetchJson, fetchArray } from '@/lib/fetch-json';
+import { TagChip, plural } from '@/components/TagChip';
+import { SignInPrompt } from '@/components/SignInPrompt';
 
 interface Match {
   project: {
@@ -47,16 +48,7 @@ export default function MatchesPage() {
 
   // In demo mode there is no user, but /api/matches still returns sample matches.
   if (!user && matches.length === 0) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to see your matches.</p>
-          <Link href="/api/auth/github" className="text-violet-600 hover:text-violet-700 font-medium">
-            Sign in with GitHub →
-          </Link>
-        </div>
-      </div>
-    );
+    return <SignInPrompt title="Your matches" message="Sign in so we can match projects to your skills and availability." />;
   }
 
   return (
@@ -99,13 +91,7 @@ export default function MatchesPage() {
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {match.project.tags?.slice(0, 5).map((tag: { tag: { name: string; color: string } }) => (
-                    <span
-                      key={tag.tag.name}
-                      className="px-3 py-1 rounded-full text-sm"
-                      style={{ backgroundColor: `${tag.tag.color}20`, color: tag.tag.color }}
-                    >
-                      {tag.tag.name}
-                    </span>
+                    <TagChip key={tag.tag.name} name={tag.tag.name} color={tag.tag.color} />
                   ))}
                 </div>
 
@@ -124,7 +110,7 @@ export default function MatchesPage() {
                   </div>
                   <div className="flex items-center">
                     <Users className="w-4 h-4 mr-1" />
-                    {match.project.roles_needed?.filter((r: { filled: boolean }) => !r.filled).length || 0} open roles
+                    {plural(match.project.roles_needed?.filter((r: { filled: boolean }) => !r.filled).length || 0, 'open role')}
                   </div>
                 </div>
 

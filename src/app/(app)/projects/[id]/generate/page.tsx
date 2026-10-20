@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Project } from '@/types';
 import { generateRepoFiles } from '@/lib/repo-templates';
 import { ArrowLeft, FileText, GitBranch, RefreshCw, Check, AlertCircle } from 'lucide-react';
-import { fetchJson, fetchArray } from '@/lib/fetch-json';
+import { fetchJson } from '@/lib/fetch-json';
 
 export default function GenerateRepoPage() {
   const params = useParams();

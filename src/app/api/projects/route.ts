@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { demoProjectsFiltered, DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { normalizeProject } from '@/lib/normalize';
-import type { Project } from '@/types';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
