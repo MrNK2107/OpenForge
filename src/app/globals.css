@@ -1,26 +1,173 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 140 20% 2%;
+    --foreground: 0 0% 100%;
+    --card: 140 20% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 140 20% 2%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 144 100% 10%;
+    --secondary: 140 20% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 140 10% 15%;
+    --muted-foreground: 140 5% 65%;
+    --accent: 142 71% 45%;
+    --accent-foreground: 144 100% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 140 20% 12%;
+    --input: 140 20% 12%;
+    --ring: 142 71% 45%;
+    --radius: 1rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+.of-root {
+  position: relative;
+  background: #050506;
+}
+
+.of-bg-image {
+  filter: saturate(1.08) contrast(1.12) brightness(0.9);
+  object-position: 52% 50%;
+  transform: scale(1.015);
+}
+
+.of-bg-grade {
+  background:
+    radial-gradient(ellipse at 63% 51%, rgba(255, 126, 38, 0.2), transparent 24%),
+    radial-gradient(ellipse at 58% 46%, rgba(4, 5, 7, 0.08), rgba(4, 5, 7, 0.34) 48%, transparent 70%),
+    radial-gradient(circle at 9% 48%, rgba(245, 106, 32, 0.12), transparent 29%),
+    radial-gradient(circle at 91% 49%, rgba(255, 117, 34, 0.14), transparent 31%),
+    linear-gradient(90deg, rgba(2, 2, 3, 0.9) 0%, rgba(4, 3, 4, 0.68) 34%, rgba(4, 3, 4, 0.12) 64%, rgba(2, 2, 3, 0.48) 100%),
+    linear-gradient(180deg, rgba(2, 2, 3, 0.7) 0%, rgba(2, 2, 3, 0.02) 42%, rgba(2, 2, 3, 0.84) 100%);
+}
+
+.of-nav {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(8, 8, 9, 0.82), rgba(8, 8, 9, 0.46));
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(22px);
+}
+
+.of-mark {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 219, 138, 0.42), transparent 44%),
+    linear-gradient(145deg, #f49845 0%, #b8441b 100%);
+  box-shadow: 0 0 30px rgba(232, 112, 42, 0.46);
+}
+
+.of-kicker {
+  border-left: 2px solid rgba(245, 161, 77, 0.92);
+  background: linear-gradient(90deg, rgba(190, 75, 24, 0.24), rgba(190, 75, 24, 0));
+  color: #f5c889;
+}
+
+.of-highlight {
+  background: linear-gradient(90deg, #f6a04a 0%, #e86c2a 52%, #f6d07c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 34px rgba(232, 108, 42, 0.18);
+}
+
+.of-cta {
+  border-radius: 10px;
+  background: linear-gradient(94deg, #d95f22 0%, #f2a24b 100%);
+  box-shadow:
+    0 16px 36px rgba(193, 75, 24, 0.32),
+    0 0 0 1px rgba(255, 230, 184, 0.22) inset;
+  color: white;
+  transition: transform 180ms ease, filter 180ms ease, box-shadow 180ms ease;
+}
+
+.of-cta:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.of-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(4, 4, 5, 0.32);
+  color: rgba(255, 255, 255, 0.88);
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.of-ghost:hover {
+  border-color: rgba(246, 177, 95, 0.44);
+  background: rgba(246, 177, 95, 0.08);
+  color: #fff;
+}
+
+.of-object-wrap {
+  margin-right: clamp(-2rem, -2vw, -0.5rem);
+  transform: translateX(clamp(0.75rem, 2.6vw, 3rem));
+  filter: drop-shadow(0 44px 68px rgba(0, 0, 0, 0.78));
+}
+
+.of-feature {
+  min-height: 190px;
+  border-left: 1px solid rgba(245, 161, 77, 0.26);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+  padding: 24px 24px 22px;
+}
+
+.of-feature:hover {
+  background: linear-gradient(180deg, rgba(245, 161, 77, 0.08), rgba(255, 255, 255, 0.012));
+}
+
+.font-jakarta {
+  font-family: var(--font-jakarta), sans-serif;
+}
+
+.font-instrument {
+  font-family: var(--font-instrument), serif;
+}
+
+@media (max-width: 1023px) {
+  .of-bg-grade {
+    background:
+      radial-gradient(circle at 58% 58%, rgba(245, 130, 45, 0.18), transparent 34%),
+      linear-gradient(180deg, rgba(2, 2, 3, 0.96) 0%, rgba(2, 2, 3, 0.58) 50%, rgba(2, 2, 3, 0.94) 100%);
+  }
+
+  .of-object-wrap {
+    margin: -2rem -2rem 0;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .of-feature {
+    min-height: 0;
+  }
+
+  .of-object-wrap {
+    min-height: 350px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .of-cta,
+  .of-ghost {
+    transition: none;
+  }
 }
