@@ -108,7 +108,10 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.` : '',
+SOFTWARE.` : `Copyright (c) ${new Date().getFullYear()} ${data.owner || 'Owner'}
+
+Licensed under the ${data.license} License.
+See https://spdx.org/licenses/${encodeURIComponent(data.license)}.html for the full text.`,
       '.gitignore': () => `node_modules/
 .env
 .env.local
