@@ -5,22 +5,27 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Rocket, Menu, X, LogOut, User as UserIcon, Plus } from 'lucide-react';
 import type { User } from '@/types';
+import { isSupabaseConfigured } from '@/lib/config';
+import { fetchJson } from '@/lib/fetch-json';
 
 export function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        setUser(data);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
+    fetchJson<User | null>('/api/auth/me', null).then(setUser);
   }, []);
+
+  // Close the mobile menu on navigation.
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setIsMenuOpen(false);
+  }
+
+  const linkClass = (href: string) =>
+    `text-sm font-medium transition-colors ${pathname?.startsWith(href) ? 'text-violet-700' : 'text-gray-600 hover:text-gray-900'}`;
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -33,7 +38,12 @@ export function Navbar() {
   if (isAuthPage) return null;
 
   return (
-    <nav className="border-b bg-white">
+    <nav className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
+      {!isSupabaseConfigured && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs sm:text-sm text-center px-4 py-1.5">
+          <strong className="font-semibold">Demo mode</strong> &middot; Supabase is not configured, so you are seeing sample data. Sign-in and edits are disabled.
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -44,15 +54,20 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/explore" className="text-gray-600 hover:text-gray-900">
+            <Link href="/explore" className={linkClass('/explore')}>
               Explore
             </Link>
+            {!user && !isSupabaseConfigured && (
+              <Link href="/matches" className={linkClass('/matches')}>
+                Matches
+              </Link>
+            )}
             {user ? (
               <>
-                <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
+                <Link href="/dashboard" className={linkClass('/dashboard')}>
                   Dashboard
                 </Link>
-                <Link href="/matches" className="text-gray-600 hover:text-gray-900">
+                <Link href="/matches" className={linkClass('/matches')}>
                   Matches
                 </Link>
                 <Link
@@ -79,6 +94,7 @@ export function Navbar() {
                   <button
                     onClick={handleLogout}
                     className="text-gray-500 hover:text-gray-700"
+                    aria-label="Log out"
                   >
                     <LogOut className="w-5 h-5" />
                   </button>
@@ -98,6 +114,8 @@ export function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-600"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>

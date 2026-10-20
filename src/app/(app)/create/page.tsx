@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Save, Rocket } from 'lucide-react';
 import type { Tag } from '@/types';
+import { fetchArray } from '@/lib/fetch-json';
 
 type Step = 'idea' | 'tech' | 'roles' | 'generate';
 
@@ -34,9 +35,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
   });
 
   useEffect(() => {
-    fetch('/api/tags')
-      .then((res) => res.json())
-      .then((data) => setTags(data));
+    fetchArray<Tag>('/api/tags').then(setTags);
   }, []);
 
   const handleSubmit = async () => {
@@ -78,7 +77,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto px-4">
         <div className="mb-8">
           <Link href="/dashboard" className="text-violet-600 hover:text-violet-700 flex items-center mb-4">
@@ -309,7 +308,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                   <li>✓ Pull request template</li>
                   <li>✓ GitHub Actions CI workflow</li>
                   <li>✓ .gitignore for {formData.template_type}</li>
-                  <li>✓ 3 starter "good first issues"</li>
+                  <li>✓ 3 starter &ldquo;good first issues&rdquo;</li>
                 </ul>
               </div>
             </div>

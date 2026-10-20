@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Task, Project } from '@/types';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { ArrowLeft, Plus, RefreshCw } from 'lucide-react';
+import { fetchJson, fetchArray } from '@/lib/fetch-json';
 
 export default function ProjectTasksPage() {
   const params = useParams();
@@ -21,14 +22,12 @@ export default function ProjectTasksPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [projectRes, tasksRes] = await Promise.all([
-          fetch(`/api/projects/${projectId}`),
-          fetch(`/api/projects/${projectId}/tasks`)
+        const [projectData, tasksData] = await Promise.all([
+          fetchJson<(Project & { project?: Project }) | null>(`/api/projects/${projectId}`, null),
+          fetchArray<Task>(`/api/projects/${projectId}/tasks`),
         ]);
-        const projectData = await projectRes.json();
-        const tasksData = await tasksRes.json();
-        setProject(projectData.project || projectData);
-        setTasks(tasksData.tasks || tasksData || []);
+        setProject(projectData?.project || projectData);
+        setTasks(tasksData);
       } catch (error) {
         console.error('Error fetching project:', error);
       } finally {
@@ -74,14 +73,14 @@ export default function ProjectTasksPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 flex items-center justify-center">
         <RefreshCw className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link

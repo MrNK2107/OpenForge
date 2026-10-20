@@ -3,9 +3,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Filter, ChevronDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { Project } from '@/types';
 import { ProjectCard } from '@/components/ProjectCard';
+import { fetchArray } from '@/lib/fetch-json';
 
 function ExploreContent() {
   const searchParams = useSearchParams();
@@ -15,30 +16,36 @@ function ExploreContent() {
   const [status, setStatus] = useState(searchParams.get('status') || 'all');
   const [difficulty, setDifficulty] = useState(searchParams.get('difficulty') || 'all');
 
-  useEffect(() => {
-    fetchProjects();
-  }, [status, difficulty]);
+  // The search box only applies on submit; filters apply immediately.
+  const [appliedSearch, setAppliedSearch] = useState(search);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const fetchProjects = async () => {
-    setLoading(true);
+  useEffect(() => {
+    let cancelled = false;
     const params = new URLSearchParams();
     if (status !== 'all') params.set('status', status);
     if (difficulty !== 'all') params.set('difficulty', difficulty);
-    if (search) params.set('search', search);
+    if (appliedSearch) params.set('search', appliedSearch);
 
-    const res = await fetch(`/api/projects?${params}`);
-    const data = await res.json();
-    setProjects(data);
-    setLoading(false);
-  };
+    fetchArray<Project>(`/api/projects?${params}`).then((data) => {
+      if (cancelled) return;
+      setProjects(data);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [status, difficulty, appliedSearch, reloadKey]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchProjects();
+    setLoading(true);
+    setAppliedSearch(search.trim());
+    setReloadKey((k) => k + 1);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Explore Projects</h1>
@@ -63,7 +70,10 @@ function ExploreContent() {
             <div className="flex gap-4">
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                onChange={(e) => {
+                  setLoading(true);
+                  setStatus(e.target.value);
+                }}
                 className="border rounded-lg px-4 py-3 bg-white"
               >
                 <option value="all">All Status</option>
@@ -74,7 +84,10 @@ function ExploreContent() {
 
               <select
                 value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
+                onChange={(e) => {
+                  setLoading(true);
+                  setDifficulty(e.target.value);
+                }}
                 className="border rounded-lg px-4 py-3 bg-white"
               >
                 <option value="all">All Difficulty</option>

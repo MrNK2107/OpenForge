@@ -38,6 +38,7 @@ export interface Project {
   owner?: User;
   tags?: Tag[];
   members?: ProjectMember[];
+  roles_needed?: ProjectRoleNeeded[];
   stars_count?: number;
 }
 

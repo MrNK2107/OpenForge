@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Zap, Clock, Users, ExternalLink } from 'lucide-react';
 import type { User } from '@/types';
 import { MatchCard } from '@/components/MatchCard';
+import { fetchJson, fetchArray } from '@/lib/fetch-json';
 
 interface Match {
   project: {
@@ -27,8 +28,8 @@ export default function MatchesPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/auth/me').then((res) => res.ok ? res.json() : null),
-      fetch('/api/matches').then((res) => res.json()),
+      fetchJson<User | null>('/api/auth/me', null),
+      fetchArray<Match>('/api/matches'),
     ]).then(([userData, matchesData]) => {
       setUser(userData);
       setMatches(matchesData);
@@ -38,15 +39,16 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  if (!user) {
+  // In demo mode there is no user, but /api/matches still returns sample matches.
+  if (!user && matches.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Please sign in to see your matches.</p>
           <Link href="/api/auth/github" className="text-violet-600 hover:text-violet-700 font-medium">
@@ -58,7 +60,7 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Matches</h1>
         <p className="text-gray-600 mb-8">

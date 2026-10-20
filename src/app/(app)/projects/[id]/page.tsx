@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Users, Star, GitBranch, ExternalLink, Plus, Settings, MessageSquare } from 'lucide-react';
 import type { Project, Task } from '@/types';
+import { fetchJson, fetchArray } from '@/lib/fetch-json';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -15,9 +16,9 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/projects/${params.id}`).then((res) => res.json()),
-      fetch(`/api/projects/${params.id}/tasks`).then((res) => res.json()),
-      fetch('/api/auth/me').then((res) => res.ok ? res.json() : null),
+      fetchJson<Project | null>(`/api/projects/${params.id}`, null),
+      fetchArray<Task>(`/api/projects/${params.id}/tasks`),
+      fetchJson<{ id: string } | null>('/api/auth/me', null),
     ]).then(([projectData, tasksData, userData]) => {
       setProject(projectData);
       setTasks(tasksData);
@@ -40,7 +41,7 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -48,7 +49,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500">Project not found</p>
       </div>
     );
@@ -64,7 +65,7 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -162,10 +163,8 @@ export default function ProjectDetailPage() {
             {/* Open Roles */}
             <div className="bg-white rounded-xl border p-6">
               <h2 className="text-xl font-semibold mb-4">Open Roles</h2>
-              {/* @ts-ignore - roles_needed is fetched from join */}
               {project.roles_needed && project.roles_needed.length > 0 ? (
                 <div className="space-y-3">
-                  {/* @ts-ignore - roles_needed is fetched from join */}
                   {project.roles_needed.map((role: { id: string; role_name: string; filled: boolean }) => (
                     <div key={role.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center">
@@ -191,8 +190,7 @@ export default function ProjectDetailPage() {
             <div className="bg-white rounded-xl border p-6">
               <h2 className="text-xl font-semibold mb-4">Team</h2>
               <div className="space-y-3">
-                {/* @ts-ignore - members fetched from join */}
-                {project.members?.map((member: { id: string; user: { avatar_url?: string; username?: string }; role: string }) => (
+                {project.members?.map((member) => (
                   <div key={member.id} className="flex items-center space-x-3">
                     {member.user?.avatar_url ? (
                       <img src={member.user.avatar_url} className="w-10 h-10 rounded-full" alt={member.user.username} />

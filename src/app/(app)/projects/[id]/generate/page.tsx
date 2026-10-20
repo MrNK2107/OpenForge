@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Project } from '@/types';
 import { generateRepoFiles } from '@/lib/repo-templates';
 import { ArrowLeft, FileText, GitBranch, RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { fetchJson, fetchArray } from '@/lib/fetch-json';
 
 export default function GenerateRepoPage() {
   const params = useParams();
@@ -22,9 +23,8 @@ export default function GenerateRepoPage() {
   useEffect(() => {
     async function fetchProject() {
       try {
-        const res = await fetch(`/api/projects/${projectId}`);
-        const data = await res.json();
-        const projectData = data.project || data;
+        const data = await fetchJson<(Project & { project?: Project }) | null>(`/api/projects/${projectId}`, null);
+        const projectData = data?.project || data;
         setProject(projectData);
 
         if (projectData) {
@@ -69,7 +69,7 @@ export default function GenerateRepoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 flex items-center justify-center">
         <RefreshCw className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
@@ -77,14 +77,14 @@ export default function GenerateRepoPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 flex items-center justify-center">
         <p className="text-slate-500">Project not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
           href={`/projects/${projectId}`}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Bell, Check, Users, MessageSquare, GitPullRequest, Star } from 'lucide-react';
 import type { Notification, User } from '@/types';
+import { fetchJson, fetchArray } from '@/lib/fetch-json';
 
 export default function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -12,8 +13,8 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/auth/me').then((res) => res.ok ? res.json() : null),
-      fetch('/api/notifications').then((res) => res.ok ? res.json() : []),
+      fetchJson<User | null>('/api/auth/me', null),
+      fetchArray<Notification>('/api/notifications'),
     ]).then(([userData, notifData]) => {
       setUser(userData);
       setNotifications(notifData);
@@ -41,7 +42,7 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -49,7 +50,7 @@ export default function NotificationsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Please sign in to view notifications.</p>
           <Link href="/api/auth/github" className="text-violet-600 hover:text-violet-700 font-medium">
@@ -63,7 +64,7 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
@@ -89,7 +90,7 @@ export default function NotificationsPage() {
           <div className="bg-white rounded-xl border p-12 text-center">
             <Bell className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No notifications</h3>
-            <p className="text-gray-500">You're all caught up!</p>
+            <p className="text-gray-500">You&apos;re all caught up!</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -130,7 +131,7 @@ export default function NotificationsPage() {
 }
 
 function NotificationIcon({ type }: { type: string }) {
-  const icons: Record<string, any> = {
+  const icons: Record<string, React.ComponentType<{ className?: string }>> = {
     match_found: Users,
     join_request: GitPullRequest,
     request_accepted: Star,

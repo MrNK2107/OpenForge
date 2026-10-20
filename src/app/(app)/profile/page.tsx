@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Save, User, Mail, Clock, Briefcase } from 'lucide-react';
 import type { User as UserType, Tag } from '@/types';
+import { fetchJson, fetchArray } from '@/lib/fetch-json';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<UserType | null>(null);
@@ -18,8 +19,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/auth/me').then((res) => res.ok ? res.json() : null),
-      fetch('/api/tags').then((res) => res.json()),
+      fetchJson<UserType | null>('/api/auth/me', null),
+      fetchArray<Tag>('/api/tags'),
     ]).then(([userData, tagsData]) => {
       setUser(userData);
       setTags(tagsData);
@@ -77,7 +78,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -85,7 +86,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Please sign in to view your profile.</p>
         </div>
@@ -94,7 +95,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
 
