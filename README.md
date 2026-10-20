@@ -2,103 +2,62 @@
 
 **Turn Ideas into Contributor-Ready Projects in Minutes**
 
-OpenForge is an open source project incubator and contributor matchmaker. Transform raw project ideas into structured, contributor-ready repositories with automated repo generation, smart contributor matching, and built-in task management.
+OpenForge is an open source project incubator and contributor matchmaker. Transform raw project ideas into structured, contributor-ready repositories with automated repo generation, skill-based contributor matching, and built-in task management.
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router)
+- **Framework**: Next.js 16 (App Router), React 19
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **Database/Auth**: Supabase
+- **Styling**: Tailwind CSS v3 (PostCSS plugin + `tailwind.config.js`)
+- **3D**: three.js + React Three Fiber / drei (landing hero)
+- **Database/Auth**: Supabase + GitHub OAuth
+- **Testing**: Vitest
 - **UI Icons**: Lucide React
 
 ## Features
 
 - **GitHub OAuth** - Sign in with your GitHub account
-- **Auto-Generated Repos** - One-click creation with README, CONTRIBUTING.md, issue templates, and CI/CD workflows
-- **Smart Matching** - AI-powered matching connects contributors with projects based on skills, availability, and interests
-- **Task Management** - Built-in Kanban board with drag-and-drop and GitHub issue sync
-- **Project Discovery** - Explore and filter public projects by status, difficulty, and technology
+- **Auto-Generated Repos** - One-click creation with README, CONTRIBUTING.md, LICENSE, .gitignore and starter issues
+- **Smart Matching** - Weighted matching on skills/tags, difficulty, availability and open roles
+- **Task Management** - Built-in Kanban board
+- **Project Discovery** - Explore and filter public projects by status, difficulty and text search
+- **Demo mode** - Every page works with sample data when no backend is configured
 
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Demo mode (no backend needed)
 
-## Environment Variables
+If `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set, the app runs in **demo mode**:
 
-Create a `.env` file with your Supabase credentials:
+- API routes serve sample projects, tasks, tags and matches from `src/lib/demo-data.ts`
+- every page renders (Explore, Matches, project detail, Kanban board, repo generator preview)
+- write endpoints return `503` with a clear message; GitHub sign-in redirects to `/explore?error=github_not_configured`
+- an amber banner under the navbar explains this, and sign-in-only pages show a friendly empty state
+
+`npm run build` also succeeds without credentials: the Supabase client falls back to harmless placeholder values and is never called.
+
+### Full mode
+
+1. Create a Supabase project and run `supabase/schema.sql` in the SQL editor.
+2. Create a GitHub OAuth app with callback URL `http://localhost:3000/api/auth/github/callback`.
+3. Copy `.env.example` to `.env.local` and fill it in:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+GITHUB_CLIENT_ID=<oauth app client id>
+GITHUB_CLIENT_SECRET=<oauth app client secret>
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-## Project Structure
+### 3D hero asset
 
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── api/                # API routes
-│   │   ├── auth/           # GitHub OAuth
-│   │   ├── projects/      # Project CRUD
-│   │   ├── matches/        # Contributor matching
-│   │   ├── notifications/ # User notifications
-│   │   └── tags/           # Tag taxonomy
-│   ├── dashboard/          # User dashboard
-│   ├── explore/           # Project discovery
-│   ├── create/            # Project creation
-│   ├── projects/[id]/     # Project detail
-│   │   ├── tasks/         # Kanban board
-│   │   └── generate/      # Repo generation
-│   ├── matches/           # Personalized matches
-│   ├── profile/           # User profile
-│   └── notifications/      # Notification center
-├── components/            # React components
-│   ├── Navbar.tsx
-│   ├── ProjectCard.tsx
-│   ├── TaskCard.tsx
-│   ├── KanbanBoard.tsx
-│   ├── MatchCard.tsx
-│   └── Skeleton.tsx
-├── lib/                    # Utilities
-│   ├── supabase.ts        # Supabase client
-│   ├── matching.ts        # Match scoring algorithm
-│   └── repo-templates.ts  # Repo generation templates
-└── types/                 # TypeScript definitions
-    └── index.ts
-```
-
-## How It Works
-
-1. **Pitch Your Idea** - Submit your project with tech stack, roles needed, and difficulty level
-2. **Generate Repo** - One-click creation of GitHub repo with best-practice templates
-3. **Match Contributors** - AI-powered matching connects you with contributors based on skills and interests
-4. **Build Together** - Manage tasks with Kanban board, track progress, and ship your project
-
-## Data Models
-
-### User
-GitHub-sourced profile with skills, roles, and availability settings
-
-### Project
-Projects have status lifecycle: `draft` → `seeking` → `active` → `paused` → `archived`
-
-### Task
-Tasks have status: `backlog` → `in_progress` → `review` → `done`
+The landing hero loads `public/assets/hero_object_3d.glb` (about 70 MB). It is **gitignored** because of its size. Without it the page still renders: an error boundary swaps in a procedural wireframe orb.
 
 ## Available Scripts
 
@@ -107,7 +66,60 @@ Tasks have status: `backlog` → `in_progress` → `review` → `done`
 | `npm run dev` | Start development server |
 | `npm run build` | Build production bundle |
 | `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
+| `npm run lint` | ESLint CLI (`eslint .`, flat config in `eslint.config.mjs`) |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest unit tests (`src/lib/__tests__`) |
+
+## Matching algorithm
+
+`scoreMatch` in `src/lib/matching.ts` is a pure function. It combines up to four weighted signals and divides by the weight actually used, so missing data neither helps nor hurts:
+
+| Signal | Weight | Score |
+|---|---|---|
+| Skills vs project tags | 0.4 | Jaccard similarity (case-insensitive) |
+| Difficulty | 0.2 | 1.0 if equal, 0.5 otherwise |
+| Availability vs time commitment | 0.2 | 1.0 if user hours >= project hours, else 0.7 (skipped if unparseable) |
+| Open (unfilled) roles | 0.2 | 1.0 if any skill contains a role name, else 0.3 |
+
+`rankProjectsForUser` drops the user's own projects and anything scoring 30 or less, then sorts best first.
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── page.tsx              # 3D landing page
+│   ├── api/                  # API routes (auth, projects, tasks, matches, notifications, tags, users)
+│   └── (app)/                # App shell (navbar + demo banner) for inner pages
+│       ├── dashboard/        # User dashboard
+│       ├── explore/          # Project discovery
+│       ├── create/           # Project creation wizard
+│       ├── projects/[id]/    # Project detail
+│       │   ├── tasks/        # Kanban board
+│       │   └── generate/     # Repo generation
+│       ├── matches/          # Personalized matches
+│       ├── profile/          # User profile
+│       └── notifications/    # Notification center
+├── components/               # Navbar, ProjectCard, MatchCard, KanbanBoard, TagChip, SignInPrompt, ForgeScene/...
+├── lib/
+│   ├── config.ts             # Supabase config detection (safe for client components)
+│   ├── supabase.ts           # Supabase client
+│   ├── matching.ts           # Match scoring + ranking (pure, tested)
+│   ├── normalize.ts          # Flatten Supabase join shapes (tested)
+│   ├── demo-data.ts          # Sample data for demo mode
+│   ├── fetch-json.ts         # Never-throwing client fetch helpers
+│   ├── repo-templates.ts     # Repo generation templates (tested)
+│   └── __tests__/            # Vitest unit tests
+├── store/                    # zustand store
+└── types/                    # TypeScript definitions
+supabase/schema.sql           # Database schema + RLS policies
+```
+
+## Data Models
+
+- **User**: GitHub-sourced profile with skills, roles and availability
+- **Project**: status lifecycle `draft` → `seeking` → `active` → `paused` → `archived`
+- **Task**: status `backlog` → `in_progress` → `review` → `done`
 
 ## License
 
