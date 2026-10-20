@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+
 import type { User } from '@/types';
 
 export async function GET() {
+  if (!isSupabaseConfigured) return NextResponse.json({ error: 'Not authenticated', demo: true }, { status: 401 });
   const cookieStore = await cookies();
   const userId = cookieStore.get('user_id')?.value;
 

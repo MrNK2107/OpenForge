@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { DEMO_MODE_ERROR } from '@/lib/demo-data';
+
 import { generateRepoFiles } from '@/lib/repo-templates';
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const { id } = await params;
   const cookieStore = await cookies();
   const userId = cookieStore.get('user_id')?.value;

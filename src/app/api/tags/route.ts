@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { DEMO_TAGS } from '@/lib/demo-data';
+
 
 export async function GET() {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_TAGS);
   const { data: tags, error } = await supabase
     .from('tags')
     .select('*')

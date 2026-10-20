@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { DEMO_PROJECTS, DEMO_MODE_ERROR } from '@/lib/demo-data';
+import { normalizeProject } from '@/lib/normalize';
 import type { Project } from '@/types';
 
 export async function GET(
@@ -7,6 +9,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  if (!isSupabaseConfigured) {
+    const demo = DEMO_PROJECTS.find((p) => p.id === id);
+    return demo ? NextResponse.json(normalizeProject(demo)) : NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
   
   const { data: project, error } = await supabase
     .from('projects')
@@ -29,13 +35,14 @@ export async function GET(
     .select('*', { count: 'exact', head: true })
     .eq('project_id', id);
 
-  return NextResponse.json({ ...project, stars_count: count || 0 });
+  return NextResponse.json({ ...normalizeProject(project), stars_count: count || 0 });
 }
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const { id } = await params;
   const body = await request.json();
 
@@ -65,6 +72,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const { id } = await params;
 
   const { error } = await supabase

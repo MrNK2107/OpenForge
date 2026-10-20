@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { DEMO_MODE_ERROR } from '@/lib/demo-data';
+
 
 export async function PATCH(request: Request) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const cookieStore = await cookies();
   const userId = cookieStore.get('user_id')?.value;
 

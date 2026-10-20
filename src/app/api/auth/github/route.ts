@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export async function GET() {
+  if (!isSupabaseConfigured || !GITHUB_CLIENT_ID) return NextResponse.redirect(`${APP_URL}/?error=github_not_configured`);
   const cookieStore = await cookies();
   const state = crypto.randomUUID();
   

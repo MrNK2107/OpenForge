@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { demoProjectsFiltered, DEMO_MODE_ERROR } from '@/lib/demo-data';
+import { normalizeProject } from '@/lib/normalize';
 import type { Project } from '@/types';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  if (!isSupabaseConfigured) return NextResponse.json(demoProjectsFiltered({ status: searchParams.get('status'), difficulty: searchParams.get('difficulty'), search: searchParams.get('search') }).map(normalizeProject));
   const status = searchParams.get('status');
   const difficulty = searchParams.get('difficulty');
   const search = searchParams.get('search');
   const limit = searchParams.get('limit') || '20';
   const offset = searchParams.get('offset') || '0';
+  const owner = searchParams.get('owner');
 
   let query = supabase
     .from('projects')
@@ -19,9 +23,13 @@ export async function GET(request: Request) {
       tags:project_tags!project_tags_project_id_fkey(tag:tags(id, name, color)),
       members:project_members!project_members_project_id_fkey(user:users(id, username, avatar_url))
     `)
-    .eq('is_public', true)
     .order('created_at', { ascending: false })
     .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
+
+  // Owners see their own private projects; everyone else only sees public ones.
+  const viewerId = (await cookies()).get('user_id')?.value;
+  if (owner) query = query.eq('owner_id', owner);
+  if (!owner || owner !== viewerId) query = query.eq('is_public', true);
 
   if (status && status !== 'all') {
     query = query.eq('status', status);
@@ -32,7 +40,9 @@ export async function GET(request: Request) {
   }
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    // Strip characters that have meaning in PostgREST filter syntax.
+    const safe = search.replace(/[,()*%\\]/g, ' ').trim();
+    if (safe) query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
   }
 
   const { data: projects, error } = await query;
@@ -54,7 +64,7 @@ export async function GET(request: Request) {
         .eq('project_id', project.id);
 
       return {
-        ...project,
+        ...normalizeProject(project),
         stars_count: count || 0,
       };
     })
@@ -64,6 +74,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const cookieStore = await cookies();
   const userId = cookieStore.get('user_id')?.value;
 

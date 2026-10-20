@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { DEMO_TASKS, DEMO_MODE_ERROR } from '@/lib/demo-data';
+
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_TASKS.filter((t) => t.project_id === id));
 
   const { data: tasks, error } = await supabase
     .from('tasks')
@@ -28,6 +31,7 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const cookieStore = await cookies();
   const userId = cookieStore.get('user_id')?.value;
   const { id } = await params;
@@ -66,6 +70,7 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const cookieStore = await cookies();
   const userId = cookieStore.get('user_id')?.value;
 
