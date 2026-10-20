@@ -1,0 +1,100 @@
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { supabase } from '@/lib/supabase';
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  const { data: tasks, error } = await supabase
+    .from('tasks')
+    .select(`
+      *,
+      assignee:users(id, username, avatar_url)
+    `)
+    .eq('project_id', id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(tasks || []);
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('user_id')?.value;
+  const { id } = await params;
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { title, description, status, difficulty, labels, assignee_id, effort_estimate } = body;
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .insert({
+      project_id: id,
+      title,
+      description,
+      status: status || 'backlog',
+      difficulty,
+      labels: labels || [],
+      assignee_id,
+      created_by: userId,
+      effort_estimate,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json(task, { status: 201 });
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('user_id')?.value;
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { id: taskId, status, title, description, difficulty, labels, assignee_id, effort_estimate } = body;
+
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (status) updates.status = status;
+  if (title) updates.title = title;
+  if (description !== undefined) updates.description = description;
+  if (difficulty) updates.difficulty = difficulty;
+  if (labels) updates.labels = labels;
+  if (assignee_id) updates.assignee_id = assignee_id;
+  if (effort_estimate) updates.effort_estimate = effort_estimate;
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .update(updates)
+    .eq('id', taskId)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json(task);
+}
