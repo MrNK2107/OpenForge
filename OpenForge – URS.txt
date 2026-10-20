@@ -1,0 +1,1230 @@
+# OpenForge – Detailed User Requirements Specification (URS)
+
+---
+
+## 📋 Document Overview
+
+| Field | Details |
+|-------|---------|
+| **Project Name** | OpenForge – Open Source Project Incubator & Contributor Matchmaker |
+| **Version** | 1.0 (Hackathon MVP) |
+| **Target Users** | Developers, designers, technical writers, students, OSS maintainers, hackathon participants |
+| **Platform** | Web Application (PWA-ready) |
+| **Open Innovation Alignment** | Democratizes OSS creation, transparent workflows, community-driven governance, open APIs |
+
+---
+
+## 1. 🎯 Executive Summary
+
+### 1.1 Problem Statement
+
+Starting or contributing to open-source projects presents significant barriers:
+
+- **For Idea Owners:**
+  - Don't know how to structure a contributor-friendly repository
+  - Lack time to create proper documentation, issue templates, CI/CD
+  - Struggle to find aligned collaborators with right skills
+  - Ideas die in notes/Discord messages without execution
+
+- **For Contributors:**
+  - Overwhelmed by massive codebases and unclear onboarding
+  - Can't find projects matching their skills/interests/time commitment
+  - "Good first issues" are often outdated or poorly scoped
+  - No clear path from first contribution to meaningful involvement
+
+- **For the OSS Ecosystem:**
+  - Knowledge silos and duplicated efforts
+  - High abandonment rate for new projects
+  - Fragmented discovery across GitHub, Reddit, Discord, Twitter
+
+### 1.2 Proposed Solution
+
+**OpenForge** is a web platform that transforms raw project ideas into structured, contributor-ready repositories in minutes. It provides:
+
+- **Idea Pitch Board:** Submit and discover project ideas with rich metadata
+- **Auto-Repo Generator:** One-click GitHub repo creation with best-practice scaffolding
+- **Contributor Matching:** Skill/interest-based matching between projects and contributors
+- **Modular Task Board:** Auto-generated and manual tasks with clear scope and difficulty
+- **Public Dashboard:** Transparent project lifecycle tracking synced with GitHub
+- **Open API:** Extensible for universities, bootcamps, NGOs, and tooling integrations
+
+### 1.3 Success Metrics (MVP)
+
+| Metric | Target |
+|--------|--------|
+| Time from idea → contributor-ready repo | < 3 minutes |
+| Successful contributor matches per project | ≥ 2 in first week |
+| User satisfaction (post-demo survey) | ≥ 4.2/5 |
+| Projects with first external PR | ≥ 30% within 2 weeks |
+
+---
+
+## 2. 👥 User Personas & Journey Maps
+
+### 2.1 Persona 1: Idea Pitcher (Project Creator)
+
+| Attribute | Details |
+|-----------|---------|
+| **Name** | Arjun, 24 |
+| **Role** | Full-stack developer at startup |
+| **Goals** | Turn side-project idea into OSS, find collaborators, build portfolio |
+| **Frustrations** | No time to set up proper repo structure, past projects died without contributors |
+| **Tech Comfort** | High (uses GitHub daily, familiar with CI/CD) |
+
+**User Journey:**
+```
+Discover OpenForge → Sign up (GitHub OAuth) → Submit Idea
+                                                    ↓
+                            Add tags, tech stack, roles needed
+                                                    ↓
+                            Click "Generate Repository"
+                                                    ↓
+                    GitHub repo created with README, LICENSE,
+                    CONTRIBUTING.md, issue templates, basic CI
+                                                    ↓
+                            Review & customize generated content
+                                                    ↓
+                            Publish to discovery board
+                                                    ↓
+                    Receive contributor match notifications
+                                                    ↓
+                            Review profiles → Accept/Decline
+                                                    ↓
+                            Assign tasks → Collaborate → Ship
+```
+
+---
+
+### 2.2 Persona 2: Contributor (Joiner)
+
+| Attribute | Details |
+|-----------|---------|
+| **Name** | Maya, 21 |
+| **Role** | CS student, aspiring OSS contributor |
+| **Goals** | Build real-world experience, find mentorship, improve GitHub profile |
+| **Frustrations** | Intimidated by large codebases, unclear "good first issues", no response from maintainers |
+| **Tech Comfort** | Medium (knows Git basics, learning React) |
+
+**User Journey:**
+```
+Discover OpenForge → Sign up (GitHub OAuth) → Create Profile
+                                                    ↓
+                            Add skills, interests, availability
+                                                    ↓
+                            Browse matched projects OR explore board
+                                                    ↓
+                            View project details, task board, team
+                                                    ↓
+                            Click "Request to Join"
+                                                    ↓
+                            Receive acceptance notification
+                                                    ↓
+                            Pick task from board → Fork repo → PR
+                                                    ↓
+                            Get reviewed → Merge → Earn contribution
+```
+
+---
+
+### 2.3 Persona 3: Mentor/Advisor
+
+| Attribute | Details |
+|-----------|---------|
+| **Name** | David, 35 |
+| **Role** | Senior engineer, OSS maintainer |
+| **Goals** | Give back to community, discover promising projects, mentor juniors |
+| **Frustrations** | Hard to find early-stage projects worth advising, no structured way to offer guidance |
+| **Tech Comfort** | Very high |
+
+**User Journey:**
+```
+Discover OpenForge → Sign up → Set role as "Mentor"
+                                        ↓
+                    Browse projects seeking advisors
+                                        ↓
+                    Offer to advise (code review, architecture, strategy)
+                                        ↓
+                    Appear on project's public team page
+                                        ↓
+                    Participate in discussions, review PRs, guide roadmap
+```
+
+---
+
+### 2.4 Persona 4: Organization (University/Bootcamp/NGO)
+
+| Attribute | Details |
+|-----------|---------|
+| **Name** | TechForGood Foundation |
+| **Role** | Non-profit promoting OSS in education |
+| **Goals** | Onboard students to OSS, track contributions, partner with projects |
+| **Frustrations** | No centralized platform, manual tracking, inconsistent project quality |
+| **Tech Comfort** | Varies (admin is technical, students are learning) |
+
+**User Journey:**
+```
+Discover OpenForge API → Request org account → Create cohort
+                                                    ↓
+                        Invite students → Track contributions
+                                                    ↓
+                        Partner with vetted projects for assignments
+                                                    ↓
+                        Export contribution reports
+```
+
+---
+
+## 3. 📐 Functional Requirements
+
+### 3.1 Authentication & User Management
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| AUTH-01 | GitHub OAuth login/signup | P0 | Required for repo operations |
+| AUTH-02 | Role selection on signup (Pitcher, Contributor, Mentor, Org) | P0 | Can hold multiple roles |
+| AUTH-03 | Profile creation with bio, skills, interests, availability | P0 | Tag-based system |
+| AUTH-04 | GitHub profile sync (repos, languages, contribution history) | P1 | Auto-populate skills |
+| AUTH-05 | Email notifications opt-in/out | P1 | Match alerts, task assignments |
+| AUTH-06 | Session management & secure logout | P0 | Standard security |
+| AUTH-07 | Account deletion with data export | P2 | GDPR compliance |
+
+---
+
+### 3.2 Idea Pitch Board
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| PITCH-01 | Submit new project idea with title, description (markdown) | P0 | Rich text editor |
+| PITCH-02 | Add tags: tech stack, domain, project type | P0 | Predefined + custom tags |
+| PITCH-03 | Specify needed roles (frontend, backend, design, docs, DevOps) | P0 | Multi-select |
+| PITCH-04 | Set project scope (weekend hack, side project, startup seed) | P1 | Helps matching |
+| PITCH-05 | Set difficulty level (beginner-friendly, intermediate, advanced) | P0 | Critical for matching |
+| PITCH-06 | Add expected time commitment (hours/week) | P1 | Helps contributor planning |
+| PITCH-07 | Upload mockups/wireframes (optional) | P2 | Image attachments |
+| PITCH-08 | Save as draft before publishing | P1 | Prevents accidental loss |
+| PITCH-09 | Edit/update idea after publishing | P0 | Version history optional |
+| PITCH-10 | Delete/archive project | P1 | Soft delete preferred |
+
+---
+
+### 3.3 Auto-Repo Generator
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| REPO-01 | One-click GitHub repo creation from idea | P0 | Core feature |
+| REPO-02 | Select template type (web app, CLI tool, library, data project, mobile app) | P0 | 3–5 templates for MVP |
+| REPO-03 | Auto-generate README.md with project info, setup, contributing guide | P0 | Pull from idea submission |
+| REPO-04 | Auto-generate LICENSE file (MIT, Apache 2.0, GPL selector) | P0 | Default to MIT |
+| REPO-05 | Auto-generate CONTRIBUTING.md with PR guidelines, code style, CoC | P0 | Template-based |
+| REPO-06 | Auto-generate issue templates (bug report, feature request, good first issue) | P0 | YAML-based |
+| REPO-07 | Auto-generate PR template | P1 | Checklist format |
+| REPO-08 | Auto-generate basic CI workflow (GitHub Actions: lint, test placeholder) | P1 | Depends on template |
+| REPO-09 | Auto-generate .gitignore based on tech stack | P0 | Language-specific |
+| REPO-10 | Create initial "good first issues" based on template | P1 | 2–3 starter issues |
+| REPO-11 | Option to create repo under user account OR organization | P1 | OAuth scope required |
+| REPO-12 | Preview generated files before creation | P1 | Editable preview |
+| REPO-13 | Link created repo back to OpenForge project | P0 | Bidirectional sync |
+| REPO-14 | Re-generate/update repo files after edits | P2 | Non-destructive update |
+
+---
+
+### 3.4 Contributor Matching Engine
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| MATCH-01 | Match contributors to projects based on skill tag overlap | P0 | Jaccard similarity MVP |
+| MATCH-02 | Filter matches by availability, difficulty preference, domain interest | P0 | Multi-factor filtering |
+| MATCH-03 | Rank matches by match score (% overlap + recency + activity) | P1 | Show top 10 |
+| MATCH-04 | Allow contributors to browse all projects with filters | P0 | Fallback to manual discovery |
+| MATCH-05 | Allow pitchers to browse contributors with filters | P1 | Active recruiting |
+| MATCH-06 | "Request to Join" button for contributors | P0 | Sends notification |
+| MATCH-07 | "Invite to Project" button for pitchers | P1 | Direct outreach |
+| MATCH-08 | Accept/decline join requests with optional message | P0 | In-app notification |
+| MATCH-09 | Show match reasoning ("Matched because: React, TypeScript, beginner-friendly") | P1 | Transparency |
+| MATCH-10 | Weekly digest email with new matches | P2 | Engagement driver |
+
+---
+
+### 3.5 Modular Task Board
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| TASK-01 | View task board for each project (Kanban: Backlog, In Progress, Review, Done) | P0 | Drag-and-drop |
+| TASK-02 | Auto-generate starter tasks from template | P1 | "Set up dev environment", "Write first test", etc. |
+| TASK-03 | Manually create tasks with title, description, labels, assignee, difficulty | P0 | Full CRUD |
+| TASK-04 | Label tasks (good first issue, bug, feature, docs, design) | P0 | Color-coded |
+| TASK-05 | Assign tasks to team members | P0 | Single or multiple |
+| TASK-06 | Self-assign open tasks | P0 | Contributor autonomy |
+| TASK-07 | Link task to GitHub issue (auto-create or link existing) | P1 | Bidirectional sync |
+| TASK-08 | Track task status updates | P0 | Manual or webhook-based |
+| TASK-09 | Comment on tasks | P1 | Threaded discussion |
+| TASK-10 | Filter tasks by label, assignee, status, difficulty | P0 | Multi-select filters |
+| TASK-11 | Estimate task effort (hours or T-shirt sizing) | P2 | Optional metadata |
+| TASK-12 | Due date (optional) | P2 | Calendar integration later |
+
+---
+
+### 3.6 Public Project Dashboard
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| DASH-01 | Public project page with description, team, tech stack, links | P0 | SEO-friendly URL |
+| DASH-02 | Display project status (ideation, active, seeking contributors, archived) | P0 | Badge system |
+| DASH-03 | Show team members with roles and GitHub links | P0 | Avatar grid |
+| DASH-04 | Show task board summary (open tasks, good first issues) | P0 | Teaser view |
+| DASH-05 | Show contribution activity (commits, PRs, issues) synced from GitHub | P1 | Webhook or polling |
+| DASH-06 | Show project timeline/milestones | P2 | Future enhancement |
+| DASH-07 | "Star" or "Watch" project for updates | P1 | User engagement |
+| DASH-08 | Share project (copy link, social share buttons) | P1 | Growth mechanism |
+| DASH-09 | Embed badge for README ("Built with OpenForge") | P2 | Viral loop |
+
+---
+
+### 3.7 GitHub Sync & Webhooks
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| SYNC-01 | Sync repo metadata (stars, forks, watchers) to dashboard | P1 | Polling or webhook |
+| SYNC-02 | Sync issues from GitHub to task board | P1 | Webhook preferred |
+| SYNC-03 | Sync PRs and link to tasks | P2 | Show PR status |
+| SYNC-04 | Sync contributors list from GitHub | P1 | Auto-update team page |
+| SYNC-05 | Handle webhook verification and security | P0 | HMAC validation |
+| SYNC-06 | Manual "Refresh Sync" button | P1 | Fallback |
+| SYNC-07 | Sync logs for debugging | P2 | Admin feature |
+
+---
+
+### 3.8 Discovery & Search
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| DISC-01 | Homepage feed of featured/trending projects | P0 | Engagement driver |
+| DISC-02 | Search projects by keyword, tag, tech stack, difficulty | P0 | Full-text + filters |
+| DISC-03 | Filter by project status, role needed, time commitment | P0 | Multi-select |
+| DISC-04 | Sort by newest, most starred, most active, best match | P1 | Dropdown selector |
+| DISC-05 | Search contributors by skill, availability, experience | P1 | For pitchers |
+| DISC-06 | "Projects seeking [role]" quick filters | P1 | E.g., "Needs Frontend" |
+| DISC-07 | Tag cloud or category navigation | P2 | Visual discovery |
+
+---
+
+### 3.9 Notifications & Communication
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| NOTIF-01 | In-app notification center | P0 | Bell icon, unread count |
+| NOTIF-02 | Notify on: match found, join request, request accepted/declined, task assigned | P0 | Core events |
+| NOTIF-03 | Notify on: new comment, PR merged, project update | P1 | Engagement |
+| NOTIF-04 | Email notifications (opt-in) for above events | P1 | Async delivery |
+| NOTIF-05 | Mark notifications as read/unread | P0 | Standard UX |
+| NOTIF-06 | Notification settings per event type | P2 | Granular control |
+| NOTIF-07 | Direct messaging between users (optional) | P2 | Or redirect to GitHub/Discord |
+
+---
+
+### 3.10 Open API & Integrations
+
+| ID | Requirement | Priority | Notes |
+|----|-------------|----------|-------|
+| API-01 | Public REST API for project discovery | P1 | GET endpoints |
+| API-02 | API key authentication for write operations | P2 | Org/admin use |
+| API-03 | Webhook subscriptions for project events | P2 | External tooling |
+| API-04 | OpenAPI/Swagger documentation | P1 | Developer experience |
+| API-05 | Discord bot integration (post new projects, match alerts) | P2 | Community engagement |
+| API-06 | Slack integration | P2 | Enterprise use |
+| API-07 | LMS/LTI integration for universities | P2 | Org persona |
+
+---
+
+## 4. 🖥 Non-Functional Requirements
+
+### 4.1 Performance
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| PERF-01 | Page load time (first contentful paint) | < 1.5s |
+| PERF-02 | API response time (95th percentile) | < 300ms |
+| PERF-03 | Repo generation time | < 10s |
+| PERF-04 | Search results return | < 500ms |
+| PERF-05 | Support concurrent users | 500+ (MVP) |
+
+### 4.2 Scalability
+
+| ID | Requirement | Notes |
+|----|-------------|-------|
+| SCAL-01 | Stateless backend for horizontal scaling | Container-ready |
+| SCAL-02 | Database connection pooling | Supabase built-in |
+| SCAL-03 | CDN for static assets | Vercel/Cloudflare |
+| SCAL-04 | Queue for async tasks (repo gen, sync) | BullMQ or Supabase Edge |
+
+### 4.3 Security
+
+| ID | Requirement | Notes |
+|----|-------------|-------|
+| SEC-01 | HTTPS everywhere | Enforced |
+| SEC-02 | OAuth tokens stored securely (server-side only) | Never in localStorage |
+| SEC-03 | Input validation and sanitization | Prevent XSS, injection |
+| SEC-04 | Rate limiting on API endpoints | Prevent abuse |
+| SEC-05 | Webhook signature verification | HMAC-SHA256 |
+| SEC-06 | Row-level security on database | Supabase RLS |
+| SEC-07 | Audit logging for sensitive actions | Admin visibility |
+
+### 4.4 Reliability
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| REL-01 | Uptime SLA | 99.5% (MVP) |
+| REL-02 | Graceful degradation if GitHub API unavailable | Show cached data, disable repo gen |
+| REL-03 | Database backups | Daily (Supabase automatic) |
+| REL-04 | Error tracking and alerting | Sentry or LogRocket |
+
+### 4.5 Usability & Accessibility
+
+| ID | Requirement | Notes |
+|----|-------------|-------|
+| UX-01 | Mobile-responsive design | Tailwind breakpoints |
+| UX-02 | Keyboard navigation support | Focus management |
+| UX-03 | WCAG 2.1 AA compliance (target) | Color contrast, alt text |
+| UX-04 | Loading states and skeleton screens | Perceived performance |
+| UX-05 | Error messages with clear actions | User-friendly copy |
+| UX-06 | Onboarding tour for new users | Optional walkthrough |
+
+### 4.6 Maintainability
+
+| ID | Requirement | Notes |
+|----|-------------|-------|
+| MAINT-01 | Modular codebase with clear separation | Feature-based folders |
+| MAINT-02 | Comprehensive README with setup instructions | < 10 min to run locally |
+| MAINT-03 | Environment variable documentation | `.env.example` |
+| MAINT-04 | Linting and formatting enforced | ESLint, Prettier |
+| MAINT-05 | Basic test coverage (critical paths) | Jest/Vitest, Playwright |
+| MAINT-06 | CI/CD pipeline for preview and production | Vercel auto-deploy |
+
+---
+
+## 5. 🗄 Data Model (Entity-Relationship)
+
+### 5.1 Core Entities
+
+```
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│   users     │       │  projects   │       │   tasks     │
+├─────────────┤       ├─────────────┤       ├─────────────┤
+│ id (PK)     │       │ id (PK)     │       │ id (PK)     │
+│ github_id   │       │ owner_id(FK)│       │ project_id  │
+│ username    │       │ title       │       │ title       │
+│ email       │       │ description │       │ description │
+│ avatar_url  │       │ status      │       │ status      │
+│ bio         │       │ difficulty  │       │ difficulty  │
+│ roles[]     │       │ scope       │       │ labels[]    │
+│ availability│       │ time_commit │       │ assignee_id │
+│ created_at  │       │ github_repo │       │ github_issue│
+│ updated_at  │       │ created_at  │       │ created_at  │
+└─────────────┘       │ updated_at  │       │ updated_at  │
+                      └─────────────┘       └─────────────┘
+```
+
+### 5.2 Relationship Entities
+
+```
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│   user_skills    │    │  project_tags    │    │ project_members  │
+├──────────────────┤    ├──────────────────┤    ├──────────────────┤
+│ user_id (FK)     │    │ project_id (FK)  │    │ project_id (FK)  │
+│ tag_id (FK)      │    │ tag_id (FK)      │    │ user_id (FK)     │
+│ proficiency      │    └──────────────────┘    │ role             │
+└──────────────────┘                            │ status           │
+                                                │ joined_at        │
+┌──────────────────┐    ┌──────────────────┐    └──────────────────┘
+│      tags        │    │  join_requests   │
+├──────────────────┤    ├──────────────────┤
+│ id (PK)          │    │ id (PK)          │
+│ name             │    │ project_id (FK)  │
+│ category         │    │ user_id (FK)     │
+│ (tech/domain/    │    │ message          │
+│  role/difficulty)│    │ status           │
+└──────────────────┘    │ created_at       │
+                        └──────────────────┘
+
+┌──────────────────┐    ┌──────────────────┐
+│  notifications   │    │   sync_logs      │
+├──────────────────┤    ├──────────────────┤
+│ id (PK)          │    │ id (PK)          │
+│ user_id (FK)     │    │ project_id (FK)  │
+│ type             │    │ event_type       │
+│ payload (JSON)   │    │ payload (JSON)   │
+│ read             │    │ status           │
+│ created_at       │    │ created_at       │
+└──────────────────┘    └──────────────────┘
+```
+
+### 5.3 Detailed Schema (PostgreSQL)
+
+```sql
+-- Users table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    github_id BIGINT UNIQUE NOT NULL,
+    username VARCHAR(100) NOT NULL,
+    email VARCHAR(255),
+    avatar_url TEXT,
+    bio TEXT,
+    roles TEXT[] DEFAULT '{}',
+    availability VARCHAR(50),
+    github_access_token TEXT, -- encrypted, server-side only
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tags table (unified for skills, tech, domains)
+CREATE TABLE tags (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) UNIQUE NOT NULL,
+    category VARCHAR(50) NOT NULL, -- 'tech', 'domain', 'role', 'difficulty'
+    color VARCHAR(7), -- hex color for UI
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- User skills (junction table)
+CREATE TABLE user_skills (
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+    proficiency VARCHAR(20) DEFAULT 'learning', -- 'learning', 'intermediate', 'expert'
+    PRIMARY KEY (user_id, tag_id)
+);
+
+-- Projects table
+CREATE TABLE projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'draft', -- 'draft', 'seeking', 'active', 'paused', 'archived'
+    difficulty VARCHAR(50), -- 'beginner', 'intermediate', 'advanced'
+    scope VARCHAR(50), -- 'weekend', 'side-project', 'startup'
+    time_commitment VARCHAR(50), -- '1-5 hrs/week', '5-10 hrs/week', '10+ hrs/week'
+    github_repo_url TEXT,
+    github_repo_id BIGINT,
+    template_type VARCHAR(50), -- 'web-app', 'cli', 'library', 'data', 'mobile'
+    license VARCHAR(50) DEFAULT 'MIT',
+    is_public BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Project tags (junction table)
+CREATE TABLE project_tags (
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (project_id, tag_id)
+);
+
+-- Project roles needed
+CREATE TABLE project_roles_needed (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    role_name VARCHAR(100) NOT NULL, -- 'frontend', 'backend', 'design', 'docs', 'devops'
+    filled BOOLEAN DEFAULT FALSE,
+    filled_by UUID REFERENCES users(id)
+);
+
+-- Project members
+CREATE TABLE project_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(100), -- 'owner', 'maintainer', 'contributor', 'mentor'
+    status VARCHAR(50) DEFAULT 'active', -- 'active', 'inactive', 'left'
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (project_id, user_id)
+);
+
+-- Join requests
+CREATE TABLE join_requests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    message TEXT,
+    status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'accepted', 'declined', 'withdrawn'
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    responded_at TIMESTAMPTZ,
+    UNIQUE (project_id, user_id, status)
+);
+
+-- Tasks
+CREATE TABLE tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'backlog', -- 'backlog', 'in_progress', 'review', 'done'
+    difficulty VARCHAR(50), -- 'easy', 'medium', 'hard'
+    labels TEXT[] DEFAULT '{}', -- 'good-first-issue', 'bug', 'feature', 'docs'
+    assignee_id UUID REFERENCES users(id),
+    github_issue_url TEXT,
+    github_issue_number INT,
+    effort_estimate VARCHAR(20), -- 'XS', 'S', 'M', 'L', 'XL'
+    due_date DATE,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Task comments
+CREATE TABLE task_comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Notifications
+CREATE TABLE notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(100) NOT NULL, -- 'match_found', 'join_request', 'request_accepted', 'task_assigned', etc.
+    title VARCHAR(255),
+    message TEXT,
+    payload JSONB DEFAULT '{}',
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- GitHub sync logs
+CREATE TABLE sync_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    event_type VARCHAR(100), -- 'repo_created', 'issues_synced', 'prs_synced', 'webhook_received'
+    payload JSONB DEFAULT '{}',
+    status VARCHAR(50), -- 'success', 'failed', 'partial'
+    error_message TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Project stars (user bookmarks)
+CREATE TABLE project_stars (
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (user_id, project_id)
+);
+
+-- Indexes for performance
+CREATE INDEX idx_projects_status ON projects(status);
+CREATE INDEX idx_projects_owner ON projects(owner_id);
+CREATE INDEX idx_tasks_project ON tasks(project_id);
+CREATE INDEX idx_tasks_assignee ON tasks(assignee_id);
+CREATE INDEX idx_notifications_user ON notifications(user_id, read);
+CREATE INDEX idx_user_skills_tag ON user_skills(tag_id);
+CREATE INDEX idx_project_tags_tag ON project_tags(tag_id);
+
+-- Full-text search index
+CREATE INDEX idx_projects_search ON projects 
+    USING GIN (to_tsvector('english', title || ' ' || COALESCE(description, '')));
+```
+
+---
+
+## 6. 🔌 API Specification (REST)
+
+### 6.1 Authentication Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/auth/github` | Initiate GitHub OAuth flow | Public |
+| GET | `/api/auth/github/callback` | Handle OAuth callback | Public |
+| POST | `/api/auth/logout` | Logout and clear session | Required |
+| GET | `/api/auth/me` | Get current user profile | Required |
+
+### 6.2 User Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/users/:id` | Get user public profile | Public |
+| PATCH | `/api/users/:id` | Update own profile | Owner |
+| GET | `/api/users/:id/skills` | Get user skills | Public |
+| PUT | `/api/users/:id/skills` | Update user skills | Owner |
+| GET | `/api/users/:id/projects` | Get user's projects | Public |
+| GET | `/api/users/:id/contributions` | Get user's contributions | Public |
+| GET | `/api/users/search` | Search contributors | Required |
+
+### 6.3 Project Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/projects` | List/search projects | Public |
+| POST | `/api/projects` | Create new project idea | Required |
+| GET | `/api/projects/:id` | Get project details | Public |
+| PATCH | `/api/projects/:id` | Update project | Owner |
+| DELETE | `/api/projects/:id` | Delete/archive project | Owner |
+| POST | `/api/projects/:id/generate-repo` | Generate GitHub repo | Owner |
+| POST | `/api/projects/:id/sync` | Trigger manual sync | Owner |
+| GET | `/api/projects/:id/members` | Get project team | Public |
+| POST | `/api/projects/:id/star` | Star a project | Required |
+| DELETE | `/api/projects/:id/star` | Unstar a project | Required |
+
+### 6.4 Join Request Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/projects/:id/join` | Request to join project | Required |
+| GET | `/api/projects/:id/requests` | List join requests | Owner |
+| PATCH | `/api/join-requests/:id` | Accept/decline request | Owner |
+| DELETE | `/api/join-requests/:id` | Withdraw own request | Requester |
+
+### 6.5 Task Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/projects/:id/tasks` | List project tasks | Public |
+| POST | `/api/projects/:id/tasks` | Create task | Member |
+| GET | `/api/tasks/:id` | Get task details | Public |
+| PATCH | `/api/tasks/:id` | Update task | Member |
+| DELETE | `/api/tasks/:id` | Delete task | Owner/Creator |
+| POST | `/api/tasks/:id/assign` | Assign task | Member |
+| POST | `/api/tasks/:id/comments` | Add comment | Member |
+| GET | `/api/tasks/:id/comments` | Get comments | Public |
+
+### 6.6 Matching Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/matches/projects` | Get matched projects for user | Required |
+| GET | `/api/matches/contributors` | Get matched contributors for project | Owner |
+
+### 6.7 Notification Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/notifications` | Get user notifications | Required |
+| PATCH | `/api/notifications/:id/read` | Mark as read | Required |
+| POST | `/api/notifications/read-all` | Mark all as read | Required |
+
+### 6.8 Tags Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/tags` | List all tags | Public |
+| GET | `/api/tags/popular` | Get popular tags | Public |
+
+### 6.9 Webhook Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/webhooks/github` | Handle GitHub webhooks | Signature |
+
+---
+
+## 7. 🎨 UI/UX Wireframes & Flows
+
+### 7.1 Information Architecture
+
+```
+OpenForge
+├── Home (Landing + Featured Projects)
+├── Explore
+│   ├── Projects (Search + Filter)
+│   └── Contributors (Search + Filter)
+├── Dashboard (Authenticated)
+│   ├── My Projects
+│   ├── My Contributions
+│   ├── Matches
+│   └── Notifications
+├── Project Pages
+│   ├── Overview
+│   ├── Task Board
+│   ├── Team
+│   └── Settings (Owner)
+├── Profile Pages
+│   ├── Public Profile
+│   └── Edit Profile
+└── Create Project Flow
+    ├── Idea Form
+    ├── Template Selection
+    ├── Preview Generated Files
+    └── Publish
+```
+
+### 7.2 Key Screens (Wireframe Descriptions)
+
+#### Screen 1: Landing Page
+```
+┌────────────────────────────────────────────────────────────┐
+│  [Logo] OpenForge                    [Explore] [Sign In]   │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│     🚀 Turn Ideas into Contributor-Ready Projects          │
+│         in Minutes, Not Days                               │
+│                                                            │
+│     [Get Started with GitHub] ← Primary CTA                │
+│                                                            │
+│     "Auto-generate repos • Find collaborators •            │
+│      Open source everything"                               │
+│                                                            │
+├────────────────────────────────────────────────────────────┤
+│  HOW IT WORKS                                              │
+│  ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐             │
+│  │ 1    │    │ 2    │    │ 3    │    │ 4    │             │
+│  │Pitch │ →  │ Gen  │ →  │Match │ →  │Build │             │
+│  │ Idea │    │ Repo │    │ Team │    │ Ship │             │
+│  └──────┘    └──────┘    └──────┘    └──────┘             │
+├────────────────────────────────────────────────────────────┤
+│  TRENDING PROJECTS                        [View All →]     │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+│  │ Proj 1  │ │ Proj 2  │ │ Proj 3  │ │ Proj 4  │          │
+│  │ ★ 42    │ │ ★ 38    │ │ ★ 35    │ │ ★ 29    │          │
+│  │ React   │ │ Python  │ │ Go      │ │ Rust    │          │
+│  │ 👥 3    │ │ 👥 5    │ │ 👥 2    │ │ 👥 4    │          │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘          │
+├────────────────────────────────────────────────────────────┤
+│  SEEKING CONTRIBUTORS                     [View All →]     │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │ [Avatar] Project Name     Needs: Frontend, Docs      │  │
+│  │          Beginner-friendly • 2-5 hrs/week           │  │
+│  │                                    [Request to Join] │  │
+│  └─────────────────────────────────────────────────────┘  │
+│  ... more rows                                            │
+├────────────────────────────────────────────────────────────┤
+│  Footer: About | GitHub | API Docs | MIT License          │
+└────────────────────────────────────────────────────────────┘
+```
+
+#### Screen 2: Create Project Flow
+```
+┌────────────────────────────────────────────────────────────┐
+│  [←Back] Create New Project                    Step 1 of 3 │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  Project Title *                                           │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ e.g., "EcoTracker - Carbon Footprint Dashboard"      │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  Description *                                             │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ Markdown supported...                                 │ │
+│  │                                                       │ │
+│  │                                                       │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  Tech Stack *                                              │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ [React ×] [Node.js ×] [PostgreSQL ×] [+ Add]         │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  Domain Tags                                               │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ [Sustainability ×] [Data Viz ×] [+ Add]              │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  ┌─────────────────┐  ┌─────────────────┐                 │
+│  │ Difficulty      │  │ Scope           │                 │
+│  │ [▼ Beginner   ] │  │ [▼ Side Project]│                 │
+│  └─────────────────┘  └─────────────────┘                 │
+│                                                            │
+│  ┌─────────────────┐  ┌─────────────────┐                 │
+│  │ Time Commitment │  │ License         │                 │
+│  │ [▼ 2-5 hrs/wk ] │  │ [▼ MIT        ] │                 │
+│  └─────────────────┘  └─────────────────┘                 │
+│                                                            │
+│  Roles Needed *                                            │
+│  [✓] Frontend  [✓] Backend  [ ] Design                    │
+│  [ ] DevOps    [✓] Docs     [ ] Other: _______            │
+│                                                            │
+│                         [Save Draft]  [Next: Generate →]   │
+└────────────────────────────────────────────────────────────┘
+```
+
+#### Screen 3: Repo Generation Preview
+```
+┌────────────────────────────────────────────────────────────┐
+│  [←Back] Generate Repository                   Step 2 of 3 │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  Template Type                                             │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+│  │ ✓ Web   │ │   CLI   │ │ Library │ │  Data   │          │
+│  │   App   │ │   Tool  │ │         │ │ Project │          │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘          │
+│                                                            │
+│  Repository Settings                                       │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ Repo Name: eco-tracker                                │ │
+│  │ Create Under: [▼ My Account (arjun)]                 │ │
+│  │ Visibility:   (•) Public  ( ) Private                │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  Files to Generate                              [Edit All] │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 📄 README.md              [Preview] [Edit]           │ │
+│  │ 📄 LICENSE (MIT)          [Preview] [Change]         │ │
+│  │ 📄 CONTRIBUTING.md        [Preview] [Edit]           │ │
+│  │ 📄 CODE_OF_CONDUCT.md     [Preview] [Edit]           │ │
+│  │ 📁 .github/                                           │ │
+│  │    ├─ ISSUE_TEMPLATE/     [Preview]                   │ │
+│  │    ├─ PULL_REQUEST_TEMPLATE.md [Preview]              │ │
+│  │    └─ workflows/ci.yml    [Preview] [Edit]            │ │
+│  │ 📄 .gitignore (Node)      [Preview]                   │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  Starter Issues (Auto-Generated)                           │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ [✓] #1 Set up development environment (good first)   │ │
+│  │ [✓] #2 Implement basic project structure             │ │
+│  │ [✓] #3 Write initial documentation                   │ │
+│  │ [ ] #4 Set up CI/CD pipeline                         │ │
+│  │                                    [+ Add Custom]     │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│              [← Back]  [Generate & Publish Project →]      │
+└────────────────────────────────────────────────────────────┘
+```
+
+#### Screen 4: Project Dashboard
+```
+┌────────────────────────────────────────────────────────────┐
+│  [Logo] OpenForge    [Explore] [Dashboard] [🔔3] [Avatar] │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  EcoTracker - Carbon Footprint Dashboard                   │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ [React] [Node.js] [PostgreSQL] [Sustainability]      │ │
+│  │ ⭐ 23 stars • 👥 4 members • 🟢 Active               │ │
+│  │                                                       │ │
+│  │ [⭐ Star] [🔗 GitHub] [📤 Share] [⚙ Settings]       │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  [Overview] [Task Board] [Team] [Activity]                 │
+│  ──────────────────────────────────────────                │
+│                                                            │
+│  TASK BOARD                                   [+ New Task] │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────┐│
+│  │ BACKLOG (5)│ │IN PROGRESS │ │  REVIEW    │ │  DONE    ││
+│  │            │ │    (2)     │ │    (1)     │ │   (8)    ││
+│  ├────────────┤ ├────────────┤ ├────────────┤ ├──────────┤│
+│  │┌──────────┐│ │┌──────────┐│ │┌──────────┐│ │┌────────┐││
+│  ││ Task 1   ││ ││ Task 6   ││ ││ Task 9   ││ ││ Task 3 │││
+│  ││ 🏷easy   ││ ││ 🏷medium ││ ││ 🏷easy   ││ ││ ✓      │││
+│  ││ [Assign] ││ ││ @maya    ││ ││ @david   ││ │└────────┘││
+│  │└──────────┘│ │└──────────┘│ │└──────────┘│ │┌────────┐││
+│  │┌──────────┐│ │┌──────────┐│ │            │ ││ Task 5 │││
+│  ││ Task 2   ││ ││ Task 7   ││ │            │ ││ ✓      │││
+│  ││ 🏷good   ││ ││ @arjun   ││ │            │ │└────────┘││
+│  ││ first    ││ │└──────────┘│ │            │ │ ... more ││
+│  ││ [Assign] ││ │            │ │            │ │          ││
+│  │└──────────┘│ │            │ │            │ │          ││
+│  │ ... more  │ │            │ │            │ │          ││
+│  └────────────┘ └────────────┘ └────────────┘ └──────────┘│
+│                                                            │
+│  OPEN ROLES                                                │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 🎨 Designer - Not filled     [2 pending requests]    │ │
+│  │ 📝 Docs Writer - Not filled  [1 pending request]     │ │
+│  └──────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────┘
+```
+
+#### Screen 5: Contributor Matching
+```
+┌────────────────────────────────────────────────────────────┐
+│  [Logo] OpenForge    [Explore] [Dashboard] [🔔3] [Avatar] │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  🎯 Matched Projects for You                               │
+│  Based on: React, TypeScript, beginner-friendly, 2-5 hrs  │
+│                                                            │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ [92% Match]                                          │ │
+│  │ 📦 EcoTracker - Carbon Footprint Dashboard           │ │
+│  │ [React] [TypeScript] [Sustainability]                │ │
+│  │ 🟢 Seeking: Frontend Developer                       │ │
+│  │ ⏱ 2-5 hrs/week • 🎯 Beginner-friendly               │ │
+│  │                                                       │ │
+│  │ "Matched because: React, TypeScript, beginner-       │ │
+│  │  friendly, sustainability interest"                  │ │
+│  │                                                       │ │
+│  │ [View Project]              [Request to Join →]      │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ [85% Match]                                          │ │
+│  │ 📦 DevFlow - Developer Productivity CLI              │ │
+│  │ [Node.js] [TypeScript] [CLI]                        │ │
+│  │ 🟢 Seeking: Backend Developer, Docs Writer          │ │
+│  │ ⏱ 5-10 hrs/week • 🎯 Intermediate                   │ │
+│  │                                                       │ │
+│  │ [View Project]              [Request to Join →]      │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  ... more matches                                          │
+│                                                            │
+│  ─────────────────────────────────────────────────────    │
+│  Not finding the right fit? [Browse All Projects →]       │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 8. 🧪 Testing Requirements
+
+### 8.1 Unit Testing
+
+| Area | Coverage Target | Tools |
+|------|-----------------|-------|
+| API route handlers | 80% | Jest/Vitest |
+| Matching algorithm | 95% | Jest/Vitest |
+| Utility functions | 90% | Jest/Vitest |
+| Database queries | 70% | Supabase test helpers |
+
+### 8.2 Integration Testing
+
+| Flow | Priority | Tools |
+|------|----------|-------|
+| Auth flow (OAuth → session → logout) | P0 | Playwright |
+| Create project → generate repo | P0 | Playwright + GitHub mock |
+| Join request flow | P0 | Playwright |
+| Task CRUD operations | P1 | Playwright |
+| GitHub webhook handling | P1 | Mock webhook payloads |
+
+### 8.3 End-to-End Testing
+
+| Scenario | Priority |
+|----------|----------|
+| New user signs up, creates project, publishes | P0 |
+| Contributor finds match, requests to join, gets accepted | P0 |
+| Owner assigns task, contributor completes, marks done | P1 |
+| GitHub sync updates dashboard | P1 |
+
+### 8.4 Performance Testing
+
+| Test | Target | Tool |
+|------|--------|------|
+| API load test (100 concurrent users) | < 500ms p95 | k6 or Artillery |
+| Database query performance | < 100ms for common queries | EXPLAIN ANALYZE |
+| Frontend bundle size | < 200KB gzipped | Lighthouse |
+
+---
+
+## 9. 📅 Implementation Roadmap
+
+### Phase 1: Hackathon MVP (48 Hours)
+
+| Hour | Milestone |
+|------|-----------|
+| 0–4 | Project setup, DB schema, auth scaffolding |
+| 4–8 | GitHub OAuth integration, user profile |
+| 8–14 | Idea submission form, project CRUD |
+| 14–20 | Auto-repo generation (template-based) |
+| 20–26 | Basic task board UI |
+| 26–32 | Simple tag-based matching |
+| 32–38 | Public dashboard, discovery feed |
+| 38–44 | Polish, seed data, bug fixes |
+| 44–48 | Demo prep, deploy, README |
+
+### Phase 2: Post-Hackathon (Weeks 1–4)
+
+| Week | Features |
+|------|----------|
+| 1 | GitHub webhook sync, improved matching algorithm |
+| 2 | Notification system, email alerts |
+| 3 | Task-GitHub issue linking, PR tracking |
+| 4 | Search optimization, contributor profiles |
+
+### Phase 3: Growth (Months 2–3)
+
+| Month | Features |
+|-------|----------|
+| 2 | Public API, Discord bot, contribution badges |
+| 3 | Org accounts, analytics dashboard, mobile PWA |
+
+---
+
+## 10. 📎 Appendices
+
+### Appendix A: Repo Templates Structure
+
+```
+templates/
+├── web-app/
+│   ├── README.md.hbs
+│   ├── CONTRIBUTING.md.hbs
+│   ├── LICENSE.hbs
+│   ├── .gitignore
+│   ├── .github/
+│   │   ├── ISSUE_TEMPLATE/
+│   │   │   ├── bug_report.md
+│   │   │   ├── feature_request.md
+│   │   │   └── good_first_issue.md
+│   │   ├── PULL_REQUEST_TEMPLATE.md
+│   │   └── workflows/
+│   │       └── ci.yml.hbs
+│   └── starter-issues.json
+├── cli-tool/
+│   └── ...
+├── library/
+│   └── ...
+├── data-project/
+│   └── ...
+└── mobile-app/
+    └── ...
+```
+
+### Appendix B: Matching Algorithm Pseudocode
+
+```python
+def calculate_match_score(user, project):
+    # Skill overlap (Jaccard similarity)
+    user_skills = set(user.skills)
+    project_tags = set(project.tech_tags + project.domain_tags)
+    skill_overlap = len(user_skills & project_tags) / len(user_skills | project_tags)
+    
+    # Difficulty alignment
+    difficulty_match = 1.0 if user.preferred_difficulty == project.difficulty else 0.5
+    
+    # Availability alignment
+    availability_match = 1.0 if user.availability >= project.time_commitment else 0.7
+    
+    # Role match
+    role_match = 1.0 if any(role in user.roles for role in project.roles_needed) else 0.3
+    
+    # Weighted score
+    score = (
+        skill_overlap * 0.4 +
+        difficulty_match * 0.2 +
+        availability_match * 0.2 +
+        role_match * 0.2
+    )
+    
+    return score
+
+def get_matches(user, all_projects, top_n=10):
+    matches = []
+    for project in all_projects:
+        if project.status == 'seeking' and user.id not in project.members:
+            score = calculate_match_score(user, project)
+            if score > 0.5:  # Minimum threshold
+                matches.append((project, score))
+    
+    matches.sort(key=lambda x: x[1], reverse=True)
+    return matches[:top_n]
+```
+
+### Appendix C: Sample Generated README.md
+
+```markdown
+# EcoTracker - Carbon Footprint Dashboard
+
+> Track and visualize your carbon footprint with actionable insights.
+
+[![Built with OpenForge](https://img.shields.io/badge/built%20with-OpenForge-blueviolet)](https://openforge.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+## 🌟 About
+
+EcoTracker helps individuals and organizations track their carbon 
+footprint through an intuitive dashboard with data visualization 
+and personalized recommendations.
+
+## 🚀 Tech Stack
+
+- **Frontend:** React, TypeScript, Tailwind CSS
+- **Backend:** Node.js, Express
+- **Database:** PostgreSQL
+- **Deployment:** Vercel, Railway
+
+## 📋 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 14+
+- npm or yarn
+
+### Installation
+
+```bash
+git clone https://github.com/arjun/eco-tracker.git
+cd eco-tracker
+npm install
+cp .env.example .env
+# Edit .env with your credentials
+npm run dev
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) 
+for guidelines.
+
+### Good First Issues
+
+Check out issues labeled [`good first issue`](../../issues?q=label%3A"good+first+issue") 
+to get started.
+
+## 👥 Team
+
+- [@arjun](https://github.com/arjun) - Project Lead
+- Open roles: Frontend Developer, Docs Writer
+
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+*Built with [OpenForge](https://openforge.dev) - Turn ideas into contributor-ready projects*
+```
+
+### Appendix D: Environment Variables
+
+```env
+# .env.example
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NODE_ENV=development
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# GitHub OAuth
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_WEBHOOK_SECRET=your_webhook_secret
+
+# Optional
+SENTRY_DSN=your_sentry_dsn
+RESEND_API_KEY=your_resend_api_key
+```
+
+---
+
+## ✅ Document Sign-Off
+
+| Role | Name | Date | Signature |
+|------|------|------|-----------|
+| Product Owner | | | |
+| Tech Lead | | | |
+| UX Designer | | | |
+| QA Lead | | | |
+
+---
+
+**Document Version History**
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | 2024-XX-XX | Team | Initial URS for Hackathon MVP |
+
+---
+
+Want me to:
+1. Generate the **Supabase migration files** from this schema?
+2. Create a **Trello/Linear task board** based on the roadmap?
+3. Write the **pitch deck outline** for hackathon demo?
+4. Scaffold the **Next.js project structure** with this architecture?
