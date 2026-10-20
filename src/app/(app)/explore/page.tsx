@@ -67,14 +67,14 @@ function ExploreContent() {
               </button>
             </form>
 
-            <div className="flex gap-4">
+            <div className="grid grid-cols-2 gap-3 md:flex md:gap-4">
               <select
                 value={status}
                 onChange={(e) => {
                   setLoading(true);
                   setStatus(e.target.value);
                 }}
-                className="border rounded-lg px-4 py-3 bg-white"
+                className="min-w-0 border rounded-lg px-3 py-3 bg-white"
               >
                 <option value="all">All Status</option>
                 <option value="seeking">Seeking Contributors</option>
@@ -88,7 +88,7 @@ function ExploreContent() {
                   setLoading(true);
                   setDifficulty(e.target.value);
                 }}
-                className="border rounded-lg px-4 py-3 bg-white"
+                className="min-w-0 border rounded-lg px-3 py-3 bg-white"
               >
                 <option value="all">All Difficulty</option>
                 <option value="beginner-friendly">Beginner-friendly</option>

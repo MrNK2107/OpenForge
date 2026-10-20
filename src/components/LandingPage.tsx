@@ -15,16 +15,17 @@ import {
 import * as THREE from 'three'
 import { ArrowRight, BarChart3, CircleGauge, ListChecks, Sparkles, Users } from 'lucide-react'
 import { Instrument_Sans, Plus_Jakarta_Sans } from 'next/font/google'
+import { SceneErrorBoundary } from './SceneErrorBoundary'
 
 const instrument = Instrument_Sans({ subsets: ['latin'], variable: '--font-instrument' })
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta' })
 
 const navItems = [
   { label: 'Explore Projects', href: '/explore' },
-  { label: 'How It Works', href: '/how-it-works' },
+  { label: 'How It Works', href: '/#how-it-works' },
   { label: 'For Contributors', href: '/matches' },
   { label: 'For Creators', href: '/create' },
-  { label: 'About', href: '/about' },
+  { label: 'About', href: '/#about' },
 ]
 
 const featureItems = [
@@ -269,10 +270,12 @@ function HeroScene() {
       <spotLight position={[4.4, 2.8, -3.8]} intensity={22} angle={0.34} penumbra={0.9} color="#8fd8ff" />
       <pointLight position={[-3.8, -0.7, 2.4]} intensity={6.4} color="#ff8a2a" />
       <pointLight position={[3.2, 1.1, -2.8]} intensity={8.6} color="#ffd27a" />
-      <Suspense fallback={<ForgePlaceholder />}>
-        <HeroModel />
-        <Environment preset="studio" environmentIntensity={1.35} background={false} />
-      </Suspense>
+      <SceneErrorBoundary fallback={<ForgePlaceholder />}>
+        <Suspense fallback={<ForgePlaceholder />}>
+          <HeroModel />
+          <Environment preset="studio" environmentIntensity={1.35} background={false} />
+        </Suspense>
+      </SceneErrorBoundary>
       <ContactShadows
         position={[0.62, -1.92, 0]}
         opacity={0.58}
@@ -342,7 +345,7 @@ export function LandingPage() {
             ))}
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className="of-ghost hidden px-4 py-2.5 text-sm sm:inline-flex">
+            <Link href="/dashboard" className="of-ghost hidden px-4 py-2.5 text-sm sm:inline-flex">
               Sign In
             </Link>
             <Link href="/create" className="of-cta px-4 py-2.5 text-sm font-semibold sm:px-5">
@@ -400,7 +403,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative z-10 border-t border-white/[0.08] bg-[#050506]/82 px-5 py-12 backdrop-blur-sm sm:px-8 lg:px-12">
+      <section id="how-it-works" className="scroll-mt-6 relative z-10 border-t border-white/[0.08] bg-[#050506]/82 px-5 py-12 backdrop-blur-sm sm:px-8 lg:px-12">
         <div className="mx-auto grid max-w-[1480px] gap-5 md:grid-cols-2 xl:grid-cols-4">
           {featureItems.map((item) => (
             <motion.article
@@ -421,7 +424,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative z-10 bg-[#080706] px-5 py-16 sm:px-8 lg:px-12">
+      <section id="about" className="scroll-mt-6 relative z-10 bg-[#080706] px-5 py-16 sm:px-8 lg:px-12">
         <div className="mx-auto grid max-w-[1480px] gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f4ad60]/75">Trusted Build Velocity</p>
