@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getSessionUserId } from '@/lib/session';
 import { DEMO_PROJECTS, DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { normalizeProject } from '@/lib/normalize';
 
@@ -43,6 +44,8 @@ export async function PATCH(
 ) {
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const { id } = await params;
+  const userId = await getSessionUserId();
+  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   const body = await request.json();
 
   const { data: project, error } = await supabase
@@ -57,6 +60,7 @@ export async function PATCH(
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
+    .eq('owner_id', userId)
     .select()
     .single();
 
@@ -73,11 +77,14 @@ export async function DELETE(
 ) {
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
   const { id } = await params;
+  const userId = await getSessionUserId();
+  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const { error } = await supabase
     .from('projects')
     .update({ status: 'archived' })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('owner_id', userId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { getSessionUserId } from '@/lib/session';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { demoProjectsFiltered, DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { normalizeProject } from '@/lib/normalize';
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
 
   // Owners see their own private projects; everyone else only sees public ones.
-  const viewerId = (await cookies()).get('user_id')?.value;
+  const viewerId = await getSessionUserId();
   if (owner) query = query.eq('owner_id', owner);
   if (!owner || owner !== viewerId) query = query.eq('is_public', true);
 
@@ -74,8 +74,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('user_id')?.value;
+  const userId = await getSessionUserId();
 
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });

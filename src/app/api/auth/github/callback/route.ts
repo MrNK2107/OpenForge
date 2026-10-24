@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { writeSessionCookie } from '@/lib/session';
 
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
@@ -107,19 +108,10 @@ export async function GET(request: Request) {
       userId = newUser.id;
     }
 
-    cookieStore.set('github_token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
-    });
-
-    cookieStore.set('user_id', userId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
-    });
+    // Signed, httpOnly session. The GitHub token stays server-side (users table);
+    // it is no longer mirrored into a cookie.
+    writeSessionCookie(cookieStore, userId);
+    cookieStore.delete('github_token');
 
     cookieStore.delete('oauth_state');
 

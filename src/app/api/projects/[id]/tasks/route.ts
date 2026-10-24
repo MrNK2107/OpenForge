@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { getSessionUserId } from '@/lib/session';
+import { canEditProject } from '@/lib/authz';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { DEMO_TASKS, DEMO_MODE_ERROR } from '@/lib/demo-data';
 
@@ -32,12 +33,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('user_id')?.value;
+  const userId = await getSessionUserId();
   const { id } = await params;
 
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!(await canEditProject(userId, id))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const body = await request.json();
@@ -71,11 +74,14 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_MODE_ERROR, { status: 503 });
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('user_id')?.value;
+  const userId = await getSessionUserId();
+  const { id } = await params;
 
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!(await canEditProject(userId, id))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const body = await request.json();
@@ -94,6 +100,7 @@ export async function PUT(
     .from('tasks')
     .update(updates)
     .eq('id', taskId)
+    .eq('project_id', id)
     .select()
     .single();
 
