@@ -53,7 +53,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
 GITHUB_CLIENT_ID=<oauth app client id>
 GITHUB_CLIENT_SECRET=<oauth app client secret>
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+SESSION_SECRET=<random, >= 32 chars, e.g. `openssl rand -hex 32`>
 ```
+
+Sessions use an HMAC-signed, httpOnly `of_session` cookie (30-day expiry). `SESSION_SECRET` is required in production (signed-in requests fail closed without it). In development a random secret is generated at startup with a warning, so sessions reset on restart.
 
 ### 3D hero asset
 

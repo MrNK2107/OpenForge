@@ -118,8 +118,12 @@ type CookieWriter = {
 };
 
 /** Reads and verifies the session from a cookie store. Never trusts `user_id`. */
-export function readSessionUserId(store: CookieReader, secret = getSessionSecret()): string | null {
-  return verifySession(store.get(SESSION_COOKIE)?.value, secret)?.uid ?? null;
+export function readSessionUserId(store: CookieReader, secret?: string): string | null {
+  const token = store.get(SESSION_COOKIE)?.value;
+  // Anonymous requests never need the secret, so public pages keep working even if
+  // SESSION_SECRET is misconfigured; any presented cookie is verified (or throws in prod).
+  if (!token) return null;
+  return verifySession(token, secret ?? getSessionSecret())?.uid ?? null;
 }
 
 export function writeSessionCookie(store: CookieWriter, userId: string, secret = getSessionSecret()): void {

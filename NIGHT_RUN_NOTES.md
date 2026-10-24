@@ -45,3 +45,43 @@ npm run dev
 - 7 `<img>` warnings could move to `next/image` (pravatar is already allowed in `next.config.js`).
 - The landing page (dark/orange) and the inner app (light/violet) use different visual languages. Unify them on the landing palette.
 - The GLB should be compressed (Draco/meshopt) or hosted elsewhere. At 70 MB it is too heavy for the landing page.
+
+---
+
+# Night run notes (2026-10-24): signed sessions
+
+Branch: `night-run/2026-10-24`, branched from `night-run/2026-10-20` (not yet merged). Nothing pushed.
+
+## What changed
+
+- **Impersonation hole closed.** The unsigned `user_id` cookie is no longer trusted anywhere. `src/lib/session.ts` issues an `of_session` cookie: `base64url(JSON{uid,exp}).HMAC-SHA256`. It is verified with `timingSafeEqual`, expires after 30 days, and is httpOnly, `sameSite=lax`, `path=/`, and `secure` in production.
+- **Secret.** `SESSION_SECRET` (at least 32 characters) is read from env and is server-only.
+  - Production: if the secret is missing, signed-in requests throw (fail closed). Anonymous requests skip verification, so public pages keep working.
+  - Dev: a random secret is generated once per process (kept on `globalThis`) and a warning is logged.
+  - No secret is committed; `.env.example` has an empty key.
+- **Routes.** Every API route reads the user through `getSessionUserId()`. The OAuth callback writes the signed cookie. Logout clears the session cookie and the legacy cookie. The raw GitHub token is no longer copied into a `github_token` cookie (it is already stored server-side).
+- **Authorization gaps found and fixed.**
+  - `PATCH`/`DELETE /api/projects/[id]` had no auth at all. They now require a session and filter on `owner_id`.
+  - Task `POST`/`PUT` now require project owner or member (`src/lib/authz.ts`), and `PUT` is scoped to `project_id`.
+- **Client writes.** No client component wrote with `user_id`. All writes were already `fetch` calls to API routes, so no client code needed changes.
+- **Tests.** 18 new tests, 44 in total, all passing.
+  - `session.test.ts`: round-trip, wrong secret, tampered payload and tampered signature, malformed tokens, expiry, cookie flags, secret policy.
+  - `session-routes.test.ts`: calls `/api/auth/me`. It returns 401 for a legacy `user_id` cookie, a forged session or an expired session, and 200 for a valid one.
+
+## Verified
+
+- `tsc`, `eslint` (0 errors, 11 warnings that existed before), `vitest` 44/44, and `next build` all pass.
+- I ran `next start` on port 4784 with a throwaway `SESSION_SECRET` set in the process env only, and tested with curl:
+  - legacy `user_id` cookie on `/api/auth/me`: 401
+  - forged `of_session`: 401
+  - validly signed session for an unknown uuid: 404 (it got past auth)
+  - forged `PATCH /api/projects/x`: 401
+  - anonymous `/api/projects`: 200
+- Headless Playwright screenshots of `/explore` and `/dashboard` render correctly.
+- **Separate issue:** the Supabase host in local `.env` fails DNS (`ENOTFOUND`). The project may be paused or deleted, so `/explore` shows its empty state after a 7-second wait. My change did not cause this.
+
+## Left
+
+- The user must set `SESSION_SECRET` in the deploy environment (see `NEEDS_INPUT`). Existing users are logged out once, because the old cookies are ignored.
+- Server writes still use the anon key. The right long-term fix is a service-role key server-side, or Supabase Auth with RLS.
+- The OAuth `state` cookie flow was not changed.
