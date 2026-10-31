@@ -2,23 +2,27 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { writeSessionCookie } from '@/lib/session';
+import { consumeOAuth } from '@/lib/oauth-state';
 
-
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export async function GET(request: Request) {
-  if (!isSupabaseConfigured || !GITHUB_CLIENT_ID) return NextResponse.redirect(new URL("/explore?error=github_not_configured", request.url));
+  const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+  const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+  if (!isSupabaseConfigured || !GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) return NextResponse.redirect(new URL("/explore?error=github_not_configured", request.url));
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const state = searchParams.get('state');
-  
-  const cookieStore = await cookies();
-  const savedState = cookieStore.get('oauth_state')?.value;
 
-  if (!code || !state || state !== savedState) {
+  // Single use: the state cookie is cleared on every callback, valid or not.
+  const cookieStore = await cookies();
+  const check = consumeOAuth(cookieStore, state);
+  if (!check.ok) {
     return NextResponse.redirect(`${APP_URL}/?error=invalid_state`);
+  }
+  if (searchParams.get('error') || !code) {
+    // e.g. the user clicked "Cancel" on GitHub (error=access_denied).
+    return NextResponse.redirect(`${APP_URL}/?error=oauth_denied`);
   }
 
   try {
@@ -32,12 +36,14 @@ export async function GET(request: Request) {
         client_id: GITHUB_CLIENT_ID,
         client_secret: GITHUB_CLIENT_SECRET,
         code,
+        redirect_uri: `${APP_URL}/api/auth/github/callback`,
+        code_verifier: check.verifier,
       }),
     });
 
     const tokenData = await tokenResponse.json();
     
-    if (tokenData.error) {
+    if (tokenData.error || typeof tokenData.access_token !== 'string') {
       return NextResponse.redirect(`${APP_URL}/?error=token_failed`);
     }
 
@@ -49,7 +55,13 @@ export async function GET(request: Request) {
       },
     });
 
+    if (!userResponse.ok) {
+      return NextResponse.redirect(`${APP_URL}/?error=auth_failed`);
+    }
     const userData = await userResponse.json();
+    if (typeof userData?.id !== 'number' || typeof userData?.login !== 'string') {
+      return NextResponse.redirect(`${APP_URL}/?error=auth_failed`);
+    }
 
     let email = userData.email;
     if (!email) {
@@ -58,8 +70,8 @@ export async function GET(request: Request) {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const emails = await emailsResponse.json();
-      email = emails.find((e: { primary: boolean }) => e.primary)?.email;
+      const emails = emailsResponse.ok ? await emailsResponse.json() : [];
+      email = (Array.isArray(emails) ? emails : []).find((e: { primary: boolean }) => e.primary)?.email;
     }
 
     const { data: existingUser } = await supabase
@@ -112,8 +124,6 @@ export async function GET(request: Request) {
     // it is no longer mirrored into a cookie.
     writeSessionCookie(cookieStore, userId);
     cookieStore.delete('github_token');
-
-    cookieStore.delete('oauth_state');
 
     return NextResponse.redirect(`${APP_URL}/dashboard`);
   } catch (error) {
