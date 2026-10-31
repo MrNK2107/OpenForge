@@ -85,3 +85,53 @@ Branch: `night-run/2026-10-24`, branched from `night-run/2026-10-20` (not yet me
 - The user must set `SESSION_SECRET` in the deploy environment (see `NEEDS_INPUT`). Existing users are logged out once, because the old cookies are ignored.
 - Server writes still use the anon key. The right long-term fix is a service-role key server-side, or Supabase Auth with RLS.
 - The OAuth `state` cookie flow was not changed.
+
+---
+
+# Night run notes (2026-10-31): OAuth state hardening + API authz audit
+
+Branch: `night-run/2026-10-31`, branched from `night-run/2026-10-24`. Nothing pushed.
+
+## What changed
+
+- **OAuth state** (`src/lib/oauth-state.ts`). `/api/auth/github` now mints:
+  - a 32-byte random `state`
+  - a PKCE verifier, with an S256 `code_challenge` (GitHub supports PKCE for OAuth apps)
+
+  Both go into one **HMAC-signed** `of_oauth` cookie. Flags: httpOnly, sameSite=lax, Secure in production, `Path=/api/auth/github`, `Max-Age=300`, plus an `exp` field inside the signed payload.
+
+  The callback clears the cookie **before** validating, so every attempt is single use (including replays and failures). It compares state in constant time and rejects a missing, mismatched, forged, expired or legacy unsigned `oauth_state` cookie. It sends `code_verifier` and `redirect_uri` on the token exchange, and handles `error=access_denied` (sends the user to `/?error=oauth_denied`). It also fails closed on a token or user response that is not OK.
+- **Authz audit** (all 14 routes). Findings, all fixed with tests:
+  1. `/api/auth/me` used `select('*')`, which **returned `github_access_token` (repo scope) to the browser**. `PATCH /api/users/me` echoed it too. Both now use `PUBLIC_USER_COLUMNS`.
+  2. `GET /api/projects/[id]` and `GET /api/projects/[id]/tasks` exposed **private projects and their tasks to anyone** (read IDOR). They now return 404 unless the caller is the owner or a member (`canViewProject`).
+  3. `POST star` / `join` worked on private projects. `join` also allowed your own project, archived projects and duplicate pending requests. It now returns 404 / 400 / 400 / 409, and the message is length-capped.
+  4. `PATCH /api/users/me` accepted arbitrary `roles` (e.g. `admin`). Roles are now whitelisted to pitcher, contributor and mentor.
+  5. `PATCH /api/projects/[id]`:
+     - arbitrary `status` is rejected with 400
+     - a non-owner gets 404, not 400
+     - an invalid JSON body gets 400
+  6. Task `PUT` without a task id now returns 400. The `project_id` scope was already in place and is now tested.
+  7. The `/api/projects` `limit`/`offset` were unbounded or NaN. `limit` is clamped to 1..50.
+  - Already OK: notifications (scoped by `user_id`), generate-repo (owner check), project PATCH/DELETE `owner_id` filter, task POST membership.
+  - Left as is: a task `assignee_id` can be any user id, not only members (low risk).
+- **Design note** `docs/server-writes-design.md` covers service role, Supabase Auth, or custom JWT. Not implemented; the choice is logged in `NEEDS_INPUT`. **Critical:** if the live DB matches `schema.sql`, `users` is `SELECT USING (true)`, so **every GitHub token can be read by anyone holding the public anon key**, directly through PostgREST. The note includes draft SQL for token isolation.
+
+## Verified
+
+- `tsc` is clean, `eslint` has 0 errors (the 11 warnings existed before), and `vitest` passes **81/81**, up from 44.
+  - New test files: `oauth-state` (11), `oauth-routes` (9), `authz-routes` (17).
+  - They run against an in-memory Supabase fake (`src/lib/__tests__/fake-supabase.ts`).
+- `next build` passes.
+- I ran `next start` on port 18731 with a throwaway `SESSION_SECRET` and tested with curl. Supabase was not contacted.
+  - The authorize redirect carries `state`, `code_challenge` and `S256`.
+  - The `Set-Cookie` header has the right flags: Path, Max-Age=300, Secure, HttpOnly, SameSite=lax.
+  - Callback responses:
+    - mismatched state: `invalid_state`, and the cookie is cleared
+    - no cookie: `invalid_state`
+    - legacy `oauth_state` cookie: `invalid_state`, and the cookie is cleared
+    - cancel: `oauth_denied`
+
+## Left
+
+- **Not verified:** a real GitHub login end to end (PKCE included). Do one live login before merging.
+- Rotate the GitHub tokens and apply the token-isolation SQL (see the design note).
