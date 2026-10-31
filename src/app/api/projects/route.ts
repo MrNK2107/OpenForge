@@ -10,8 +10,9 @@ export async function GET(request: Request) {
   const status = searchParams.get('status');
   const difficulty = searchParams.get('difficulty');
   const search = searchParams.get('search');
-  const limit = searchParams.get('limit') || '20';
-  const offset = searchParams.get('offset') || '0';
+  // Clamp paging so a caller can't ask for the whole table (each row also costs a count query).
+  const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10) || 20, 1), 50);
+  const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10) || 0, 0);
   const owner = searchParams.get('owner');
 
   let query = supabase
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
       members:project_members!project_members_project_id_fkey(user:users(id, username, avatar_url))
     `)
     .order('created_at', { ascending: false })
-    .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
+    .range(offset, offset + limit - 1);
 
   // Owners see their own private projects; everyone else only sees public ones.
   const viewerId = await getSessionUserId();

@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getSessionUserId } from '@/lib/session';
 import { DEMO_PROJECTS, DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { normalizeProject } from '@/lib/normalize';
+import { canViewProject, PROJECT_STATUSES } from '@/lib/authz';
 
 export async function GET(
   request: Request,
@@ -29,6 +30,10 @@ export async function GET(
   if (error || !project) {
     return NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
+  // Private projects: owner and members only. Same 404 as "missing" so ids can't be probed.
+  if (!project.is_public && !(await canViewProject(await getSessionUserId(), id))) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
 
   const { count } = await supabase
     .from('project_stars')
@@ -46,7 +51,13 @@ export async function PATCH(
   const { id } = await params;
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+  if (body.status !== undefined && !(PROJECT_STATUSES as readonly string[]).includes(body.status)) {
+    return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+  }
 
   const { data: project, error } = await supabase
     .from('projects')
@@ -64,6 +75,10 @@ export async function PATCH(
     .select()
     .single();
 
+  if (error?.code === 'PGRST116' || (!error && !project)) {
+    // No row matched id + owner_id: missing or not yours.
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { DEMO_MODE_ERROR } from '@/lib/demo-data';
+import { canViewProject } from '@/lib/authz';
 
 
 export async function POST(
@@ -14,6 +15,10 @@ export async function POST(
 
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
+  if (!(await canViewProject(userId, id))) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
 
   const { error } = await supabase

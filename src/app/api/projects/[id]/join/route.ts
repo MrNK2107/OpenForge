@@ -16,14 +16,40 @@ export async function POST(
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
+  const { data: project } = await supabase
+    .from('projects')
+    .select('owner_id, is_public, status')
+    .eq('id', id)
+    .single();
+  // Only public, non-archived projects accept requests; hide private ones (404, not 403).
+  if (!project || !project.is_public) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
+  if (project.owner_id === userId) {
+    return NextResponse.json({ error: 'You own this project' }, { status: 400 });
+  }
+  if (project.status === 'archived') {
+    return NextResponse.json({ error: 'Project is archived' }, { status: 400 });
+  }
+  const { count: pending } = await supabase
+    .from('join_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('project_id', id)
+    .eq('user_id', userId)
+    .eq('status', 'pending');
+  if ((pending ?? 0) > 0) {
+    return NextResponse.json({ error: 'Request already pending' }, { status: 409 });
+  }
+
   const body = await request.json().catch(() => ({}));
+  const message = typeof body?.message === 'string' ? body.message.slice(0, 2000) : null;
 
   const { error } = await supabase
     .from('join_requests')
     .insert({
       project_id: id,
       user_id: userId,
-      message: body.message || null,
+      message: message || null,
       status: 'pending',
     });
 

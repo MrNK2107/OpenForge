@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { canEditProject } from '@/lib/authz';
+import { canEditProject, canViewProject } from '@/lib/authz';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { DEMO_TASKS, DEMO_MODE_ERROR } from '@/lib/demo-data';
 
@@ -11,6 +11,9 @@ export async function GET(
 ) {
   const { id } = await params;
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_TASKS.filter((t) => t.project_id === id));
+  if (!(await canViewProject(await getSessionUserId(), id))) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
 
   const { data: tasks, error } = await supabase
     .from('tasks')
@@ -84,7 +87,10 @@ export async function PUT(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body.id !== 'string' || !body.id) {
+    return NextResponse.json({ error: 'Task id is required' }, { status: 400 });
+  }
   const { id: taskId, status, title, description, difficulty, labels, assignee_id, effort_estimate } = body;
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };

@@ -1,8 +1,8 @@
 /**
  * Minimal in-memory stand-in for the supabase-js query builder, for route tests.
  * Supports: select (incl. count/head), insert, update, upsert, delete, eq, in, or (ignored),
- * order/limit/range (ignored), single, maybeSingle. Embedded relations in select() are
- * not resolved; rows come back as stored.
+ * order/limit/range (ignored), single, maybeSingle. Plain column lists in select() are
+ * honoured; '*' or embedded relations return whole rows (relations are not resolved).
  */
 type Row = Record<string, unknown>;
 
@@ -18,6 +18,8 @@ export function createFakeSupabase(seed: Record<string, Row[]> = {}) {
     let countMode = false;
     let headMode = false;
     let returning = false;
+    let columns: string[] | null = null;
+    const project = (r: Row) => (columns ? Object.fromEntries(columns.map((c) => [c, r[c]])) : { ...r });
     const filters: Array<[string, unknown]> = [];
     const inFilters: Array<[string, unknown[]]> = [];
 
@@ -29,7 +31,7 @@ export function createFakeSupabase(seed: Record<string, Row[]> = {}) {
       const rows = tables[table];
       if (op === 'select') {
         const hit = rows.filter(matches);
-        return { data: headMode ? null : hit, error: null, count: countMode ? hit.length : undefined };
+        return { data: headMode ? null : hit.map(project), error: null, count: countMode ? hit.length : undefined };
       }
       if (op === 'insert' || op === 'upsert') {
         const list = Array.isArray(payload) ? payload : [payload!];
@@ -39,8 +41,10 @@ export function createFakeSupabase(seed: Record<string, Row[]> = {}) {
       }
       if (op === 'update') {
         const hit = rows.filter(matches);
-        hit.forEach((r) => Object.assign(r, payload));
-        return { data: returning ? hit : null, error: null };
+        // Like JSON over the wire: undefined fields are not sent.
+        const defined = Object.fromEntries(Object.entries(payload as Row).filter(([, v]) => v !== undefined));
+        hit.forEach((r) => Object.assign(r, defined));
+        return { data: returning ? hit.map(project) : null, error: null };
       }
       const keep = rows.filter((r) => !matches(r));
       tables[table] = keep;
@@ -48,7 +52,9 @@ export function createFakeSupabase(seed: Record<string, Row[]> = {}) {
     }
 
     const b = {
-      select(_cols?: string, opts?: { count?: string; head?: boolean }) {
+      select(cols?: string, opts?: { count?: string; head?: boolean }) {
+        // Plain column lists are honoured; '*' and embedded relations return whole rows.
+        if (cols && cols !== '*' && !cols.includes('(')) columns = cols.split(',').map((c) => c.trim());
         if (op === 'select') {
           countMode = !!opts?.count;
           headMode = !!opts?.head;
