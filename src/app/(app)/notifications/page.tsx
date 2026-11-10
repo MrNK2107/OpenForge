@@ -42,8 +42,8 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
+      <div className="min-h-[calc(100vh-4rem)] bg-neutral-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -55,14 +55,14 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-neutral-950">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
-            <Bell className="w-8 h-8 text-violet-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+            <Bell className="w-8 h-8 text-orange-400" />
+            <h1 className="text-3xl font-bold text-neutral-100">Notifications</h1>
             {unreadCount > 0 && (
-              <span className="bg-violet-600 text-white text-sm px-2 py-1 rounded-full">
+              <span className="bg-orange-600 text-white text-sm px-2 py-1 rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -70,7 +70,7 @@ export default function NotificationsPage() {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-violet-600 hover:text-violet-700 text-sm font-medium"
+              className="text-orange-400 hover:text-orange-300 text-sm font-medium"
             >
               Mark all as read
             </button>
@@ -78,35 +78,35 @@ export default function NotificationsPage() {
         </div>
 
         {notifications.length === 0 ? (
-          <div className="bg-white rounded-xl border p-12 text-center">
-            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <div className="bg-neutral-900 rounded-xl border border-white/10 p-12 text-center">
+            <Bell className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No notifications</h3>
-            <p className="text-gray-500">You&apos;re all caught up!</p>
+            <p className="text-neutral-500">You&apos;re all caught up!</p>
           </div>
         ) : (
           <div className="space-y-3">
             {notifications.map((notif) => (
               <div
                 key={notif.id}
-                className={`bg-white border rounded-lg p-4 ${notif.read ? 'opacity-60' : ''}`}
+                className={`bg-neutral-900 border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg p-4 ${notif.read ? 'opacity-60' : ''}`}
               >
                 <div className="flex items-start space-x-4">
-                  <div className={`p-2 rounded-lg ${notif.read ? 'bg-gray-100' : 'bg-violet-100'}`}>
+                  <div className={`p-2 rounded-lg ${notif.read ? 'bg-white/10' : 'bg-orange-500/10'}`}>
                     <NotificationIcon type={notif.type} />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{notif.title}</h3>
+                    <h3 className="font-semibold text-neutral-100">{notif.title}</h3>
                     {notif.message && (
-                      <p className="text-gray-600 text-sm mt-1">{notif.message}</p>
+                      <p className="text-neutral-400 text-sm mt-1">{notif.message}</p>
                     )}
-                    <p className="text-gray-400 text-xs mt-2">
+                    <p className="text-neutral-500 text-xs mt-2">
                       {new Date(notif.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   {!notif.read && (
                     <button
                       onClick={() => handleMarkAsRead(notif.id)}
-                      className="p-2 text-gray-400 hover:text-gray-600"
+                      className="p-2 text-neutral-500 hover:text-neutral-300"
                     >
                       <Check className="w-4 h-4" />
                     </button>
@@ -129,5 +129,5 @@ function NotificationIcon({ type }: { type: string }) {
     task_assigned: MessageSquare,
   };
   const Icon = icons[type] || Bell;
-  return <Icon className="w-5 h-5 text-violet-600" />;
+  return <Icon className="w-5 h-5 text-orange-400" />;
 }

@@ -63,7 +63,7 @@ Sessions use an HMAC-signed, httpOnly `of_session` cookie (30-day expiry). `SESS
 
 ### 3D hero asset
 
-The landing hero loads `public/assets/hero_object_3d.glb` (about 70 MB). It is **gitignored** because of its size. Without it the page still renders: an error boundary swaps in a procedural wireframe orb.
+The landing hero loads `public/assets/hero_object_3d.glb` (about 4 MB, committed). It was compressed from a 70 MB original with gltf-transform: mesh simplification (15% of triangles), 1024px textures, and meshopt compression. Without it the page still renders: an error boundary swaps in a procedural wireframe orb.
 
 ## Available Scripts
 

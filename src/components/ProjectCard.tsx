@@ -11,11 +11,11 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, showOwner = true }: ProjectCardProps) {
   const statusColors = {
-    draft: 'bg-slate-100 text-slate-600',
-    seeking: 'bg-green-100 text-green-600',
-    active: 'bg-blue-100 text-blue-600',
-    paused: 'bg-amber-100 text-amber-600',
-    archived: 'bg-slate-100 text-slate-400',
+    draft: 'bg-white/10 text-neutral-400',
+    seeking: 'bg-green-500/10 text-green-400',
+    active: 'bg-blue-500/10 text-blue-400',
+    paused: 'bg-amber-500/10 text-amber-400',
+    archived: 'bg-white/5 text-neutral-500',
   };
 
   const difficultyColors = {
@@ -26,9 +26,9 @@ export function ProjectCard({ project, showOwner = true }: ProjectCardProps) {
 
   return (
     <Link href={`/projects/${project.id}`}>
-      <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all group h-full flex flex-col">
+      <div className="bg-neutral-900 rounded-xl border border-white/10 p-5 hover:shadow-lg transition-all group h-full flex flex-col">
         <div className="flex items-start justify-between gap-3 mb-3">
-          <h3 className="font-semibold text-lg text-slate-900 group-hover:text-violet-600 transition-colors line-clamp-2">
+          <h3 className="font-semibold text-lg text-neutral-100 group-hover:text-orange-400 transition-colors line-clamp-2">
             {project.title}
           </h3>
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[project.status]}`}>
@@ -37,14 +37,14 @@ export function ProjectCard({ project, showOwner = true }: ProjectCardProps) {
         </div>
 
         {project.description && (
-          <p className="text-sm text-slate-500 mb-4 line-clamp-3 flex-grow">{project.description}</p>
+          <p className="text-sm text-neutral-500 mb-4 line-clamp-3 flex-grow">{project.description}</p>
         )}
 
         <div className="flex flex-wrap gap-1.5 mb-4">
           {project.tags?.slice(0, 4).map((tag) => (
             <span
               key={tag.id}
-              className="px-2 py-0.5 text-xs bg-violet-50 text-violet-600 rounded-full"
+              className="px-2 py-0.5 text-xs bg-orange-500/10 text-orange-400 rounded-full"
             >
               {tag.name}
             </span>
@@ -52,7 +52,7 @@ export function ProjectCard({ project, showOwner = true }: ProjectCardProps) {
           {(!project.tags || project.tags.length === 0) && project.difficulty && (
             <span
               className={`px-2 py-0.5 text-xs text-white rounded-full ${
-                difficultyColors[project.difficulty as keyof typeof difficultyColors] || 'bg-slate-400'
+                difficultyColors[project.difficulty as keyof typeof difficultyColors] || 'bg-neutral-600'
               }`}
             >
               {project.difficulty}
@@ -60,7 +60,7 @@ export function ProjectCard({ project, showOwner = true }: ProjectCardProps) {
           )}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-100">
+        <div className="flex items-center justify-between text-xs text-neutral-500 pt-3 border-t border-white/5">
           <div className="flex items-center gap-4">
             {(project.stars_count ?? 0) > 0 && (
               <span className="flex items-center gap-1">
@@ -90,8 +90,8 @@ export function ProjectCard({ project, showOwner = true }: ProjectCardProps) {
                   className="w-5 h-5 rounded-full"
                 />
               ) : (
-                <div className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center">
-                  <span className="text-xs text-violet-600 font-medium">
+                <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <span className="text-xs text-orange-400 font-medium">
                     {project.owner.username.charAt(0).toUpperCase()}
                   </span>
                 </div>

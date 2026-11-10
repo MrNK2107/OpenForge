@@ -77,13 +77,13 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-12">
+    <div className="min-h-[calc(100vh-4rem)] bg-neutral-950 py-12">
       <div className="max-w-3xl mx-auto px-4">
         <div className="mb-8">
-          <Link href="/dashboard" className="text-violet-600 hover:text-violet-700 flex items-center mb-4">
+          <Link href="/dashboard" className="text-orange-400 hover:text-orange-300 flex items-center mb-4">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Project</h1>
+          <h1 className="text-3xl font-bold text-neutral-100">Create New Project</h1>
         </div>
 
         {/* Progress Steps */}
@@ -91,50 +91,50 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
           {['idea', 'tech', 'roles', 'generate'].map((s, i) => (
             <div key={s} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === s ? 'bg-violet-600 text-white' : 
-                ['idea', 'tech', 'roles', 'generate'].indexOf(step) > i ? 'bg-violet-100 text-violet-600' : 'bg-gray-200 text-gray-500'
+                step === s ? 'bg-orange-600 text-white' : 
+                ['idea', 'tech', 'roles', 'generate'].indexOf(step) > i ? 'bg-orange-500/10 text-orange-400' : 'bg-white/10 text-neutral-500'
               }`}>
                 {i + 1}
               </div>
-              {i < 3 && <div className={`w-16 h-1 mx-2 ${['idea', 'tech', 'roles', 'generate'].indexOf(step) > i ? 'bg-violet-600' : 'bg-gray-200'}`} />}
+              {i < 3 && <div className={`w-16 h-1 mx-2 ${['idea', 'tech', 'roles', 'generate'].indexOf(step) > i ? 'bg-orange-600' : 'bg-white/10'}`} />}
             </div>
           ))}
         </div>
 
-        <div className="bg-white rounded-xl border p-8">
+        <div className="bg-neutral-900 rounded-xl border border-white/10 p-8">
           {step === 'idea' && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Tell us about your idea</h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Project Title *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g., EcoTracker - Carbon Footprint Dashboard"
-                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-violet-500"
+                  className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Description *</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Describe your project idea, goals, and what problem it solves..."
                   rows={5}
-                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-violet-500"
+                  className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty *</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Difficulty *</label>
                   <select
                     value={formData.difficulty}
                     onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-3"
+                    className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3"
                   >
                     <option value="beginner-friendly">Beginner-friendly</option>
                     <option value="intermediate">Intermediate</option>
@@ -143,11 +143,11 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Scope</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Scope</label>
                   <select
                     value={formData.scope}
                     onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-3"
+                    className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3"
                   >
                     <option value="weekend">Weekend Project</option>
                     <option value="side-project">Side Project</option>
@@ -158,11 +158,11 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Time Commitment</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Time Commitment</label>
                   <select
                     value={formData.time_commitment}
                     onChange={(e) => setFormData({ ...formData, time_commitment: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-3"
+                    className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3"
                   >
                     <option value="1-2 hrs/week">1-2 hrs/week</option>
                     <option value="2-5 hrs/week">2-5 hrs/week</option>
@@ -172,11 +172,11 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">License</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">License</label>
                   <select
                     value={formData.license}
                     onChange={(e) => setFormData({ ...formData, license: e.target.value })}
-                    className="w-full border rounded-lg px-4 py-3"
+                    className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3"
                   >
                     <option value="MIT">MIT</option>
                     <option value="Apache 2.0">Apache 2.0</option>
@@ -193,7 +193,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
               <h2 className="text-xl font-semibold">Select Tech Stack & Tags</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tech Stack</label>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Tech Stack</label>
                 <div className="flex flex-wrap gap-2">
                   {tags.filter((t) => t.category === 'tech').map((tag) => (
                     <button
@@ -202,8 +202,8 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                       onClick={() => toggleTag(tag.name)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
                         selectedTags.includes(tag.name)
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-white/10 text-neutral-300 hover:bg-white/20'
                       }`}
                     >
                       {tag.name}
@@ -213,7 +213,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">Domain</label>
                 <div className="flex flex-wrap gap-2">
                   {tags.filter((t) => t.category === 'domain').map((tag) => (
                     <button
@@ -222,8 +222,8 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                       onClick={() => toggleTag(tag.name)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
                         selectedTags.includes(tag.name)
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-white/10 text-neutral-300 hover:bg-white/20'
                       }`}
                     >
                       {tag.name}
@@ -246,8 +246,8 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                     onClick={() => toggleRole(role)}
                     className={`p-4 border rounded-lg text-left transition ${
                       formData.roles_needed.includes(role)
-                        ? 'border-violet-600 bg-violet-50'
-                        : 'hover:border-gray-300'
+                        ? 'border-orange-500 bg-orange-500/10'
+                        : 'border-white/10 hover:border-white/30'
                     }`}
                   >
                     <div className="flex items-center">
@@ -277,8 +277,8 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                     onClick={() => setFormData({ ...formData, template_type: template.id })}
                     className={`p-4 border rounded-lg text-left transition ${
                       formData.template_type === template.id
-                        ? 'border-violet-600 bg-violet-50'
-                        : 'hover:border-gray-300'
+                        ? 'border-orange-500 bg-orange-500/10'
+                        : 'border-white/10 hover:border-white/30'
                     }`}
                   >
                     <div className="flex items-center">
@@ -291,16 +291,16 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                       />
                       <div>
                         <div className="font-medium">{template.name}</div>
-                        <div className="text-sm text-gray-500">{template.description}</div>
+                        <div className="text-sm text-neutral-500">{template.description}</div>
                       </div>
                     </div>
                   </button>
                 ))}
               </div>
 
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-neutral-950 p-4 rounded-lg">
                 <h3 className="font-medium mb-2">What will be generated:</h3>
-                <ul className="text-sm text-gray-600 space-y-1">
+                <ul className="text-sm text-neutral-400 space-y-1">
                   <li>✓ README.md with project setup instructions</li>
                   <li>✓ CONTRIBUTING.md guidelines</li>
                   <li>✓ LICENSE file ({formData.license})</li>
@@ -314,11 +314,11 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
             </div>
           )}
 
-          <div className="flex justify-between mt-8 pt-6 border-t">
+          <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
             {step !== 'idea' && (
               <button
                 onClick={() => setStep(step === 'generate' ? 'roles' : step === 'roles' ? 'tech' : 'idea')}
-                className="flex items-center px-6 py-3 border rounded-lg hover:bg-gray-50"
+                className="flex items-center px-6 py-3 border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg hover:bg-white/5"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </button>
@@ -328,7 +328,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
               <button
                 onClick={handleSubmit}
                 disabled={loading || !formData.title || !formData.description}
-                className="flex items-center px-6 py-3 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                className="flex items-center px-6 py-3 border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg hover:bg-white/5 disabled:opacity-50"
               >
                 <Save className="w-4 h-4 mr-2" /> Save as Draft
               </button>
@@ -337,7 +337,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                 <button
                   onClick={() => setStep(step === 'idea' ? 'tech' : step === 'tech' ? 'roles' : 'generate')}
                   disabled={step === 'idea' && (!formData.title || !formData.description)}
-                  className="flex items-center px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50"
+                  className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-500 disabled:opacity-50"
                 >
                   Next <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
@@ -345,7 +345,7 @@ export default function CreateProjectPage({ searchParams }: { searchParams: Prom
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="flex items-center px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50"
+                  className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-500 disabled:opacity-50"
                 >
                   <Rocket className="w-4 h-4 mr-2" />
                   {loading ? 'Creating...' : 'Create & Generate Repo'}

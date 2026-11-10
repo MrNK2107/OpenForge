@@ -79,8 +79,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
+      <div className="min-h-[calc(100vh-4rem)] bg-neutral-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -90,47 +90,47 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-neutral-950">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
+        <h1 className="text-3xl font-bold text-neutral-100 mb-8">Profile Settings</h1>
 
-        <div className="bg-white rounded-xl border p-6 space-y-6">
+        <div className="bg-neutral-900 rounded-xl border border-white/10 p-6 space-y-6">
           {/* Avatar & Basic Info */}
           <div className="flex items-center space-x-6">
             {user.avatar_url ? (
               <img src={user.avatar_url} alt={user.username} className="w-20 h-20 rounded-full" />
             ) : (
-              <div className="w-20 h-20 bg-violet-100 rounded-full flex items-center justify-center">
-                <span className="text-3xl font-bold text-violet-600">{user.username?.[0]?.toUpperCase()}</span>
+              <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center">
+                <span className="text-3xl font-bold text-orange-400">{user.username?.[0]?.toUpperCase()}</span>
               </div>
             )}
             <div>
               <h2 className="text-xl font-semibold">{user.username}</h2>
-              <p className="text-gray-500">{user.email}</p>
+              <p className="text-neutral-500">{user.email}</p>
             </div>
           </div>
 
           {/* Bio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">Bio</label>
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               placeholder="Tell us about yourself..."
               rows={3}
-              className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-violet-500"
+              className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           {/* Availability */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
               <Clock className="w-4 h-4 inline mr-1" /> Availability
             </label>
             <select
               value={formData.availability}
               onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
-              className="w-full border rounded-lg px-4 py-3"
+              className="w-full border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg px-4 py-3"
             >
               <option value="">Select availability</option>
               <option value="1-2 hrs/week">1-2 hrs/week</option>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
 
           {/* Roles */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
               <Briefcase className="w-4 h-4 inline mr-1" /> Roles
             </label>
             <div className="flex flex-wrap gap-2">
@@ -153,8 +153,8 @@ export default function ProfilePage() {
                   onClick={() => toggleRole(role.toLowerCase())}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                     formData.roles.includes(role.toLowerCase())
-                      ? 'bg-violet-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-white/10 text-neutral-300 hover:bg-white/20'
                   }`}
                 >
                   {role}
@@ -165,7 +165,7 @@ export default function ProfilePage() {
 
           {/* Skills */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">Skills</label>
             <div className="flex flex-wrap gap-2 mb-3">
               {tags.filter(t => t.category === 'tech').map((tag) => (
                 <button
@@ -174,8 +174,8 @@ export default function ProfilePage() {
                   onClick={() => toggleSkill(tag.name)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition ${
                     selectedSkills.includes(tag.name)
-                      ? 'bg-violet-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-white/10 text-neutral-300 hover:bg-white/20'
                   }`}
                 >
                   {tag.name}
@@ -185,11 +185,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Save Button */}
-          <div className="pt-4 border-t">
+          <div className="pt-4 border-t border-white/10">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center bg-violet-600 text-white px-6 py-3 rounded-lg hover:bg-violet-700 disabled:opacity-50"
+              className="flex items-center bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-500 disabled:opacity-50"
             >
               <Save className="w-5 h-5 mr-2" />
               {saving ? 'Saving...' : 'Save Changes'}

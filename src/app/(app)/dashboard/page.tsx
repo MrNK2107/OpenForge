@@ -30,8 +30,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" />
+      <div className="min-h-[calc(100vh-4rem)] bg-neutral-950 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -41,27 +41,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-neutral-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
-        <div className="bg-white rounded-xl border p-6 mb-8">
+        <div className="bg-neutral-900 rounded-xl border border-white/10 p-6 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {user.avatar_url ? (
                 <img src={user.avatar_url} alt={user.username} className="w-16 h-16 rounded-full" />
               ) : (
-                <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-violet-600">{user.username?.[0]?.toUpperCase()}</span>
+                <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center">
+                  <span className="text-2xl font-bold text-orange-400">{user.username?.[0]?.toUpperCase()}</span>
                 </div>
               )}
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Welcome, {user.username}!</h1>
-                <p className="text-gray-500">{user.bio || 'No bio yet'}</p>
+                <h1 className="text-2xl font-bold text-neutral-100">Welcome, {user.username}!</h1>
+                <p className="text-neutral-500">{user.bio || 'No bio yet'}</p>
               </div>
             </div>
             <Link
               href="/create"
-              className="flex items-center bg-violet-600 text-white px-6 py-3 rounded-lg hover:bg-violet-700"
+              className="flex items-center bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-500"
             >
               <Plus className="w-5 h-5 mr-2" />
               New Project
@@ -78,15 +78,15 @@ export default function DashboardPage() {
         </div>
 
         {/* My Projects */}
-        <div className="bg-white rounded-xl border p-6">
+        <div className="bg-neutral-900 rounded-xl border border-white/10 p-6">
           <h2 className="text-xl font-semibold mb-4">My Projects</h2>
           {projects.length === 0 ? (
             <div className="text-center py-12">
-              <GitBranch className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">You haven&apos;t created any projects yet.</p>
+              <GitBranch className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
+              <p className="text-neutral-500 mb-4">You haven&apos;t created any projects yet.</p>
               <Link
                 href="/create"
-                className="inline-flex items-center text-violet-600 hover:text-violet-700 font-medium"
+                className="inline-flex items-center text-orange-400 hover:text-orange-300 font-medium"
               >
                 <Plus className="w-4 h-4 mr-1" /> Create your first project
               </Link>
@@ -97,24 +97,24 @@ export default function DashboardPage() {
                 <Link
                   key={project.id}
                   href={`/projects/${project.id}`}
-                  className="border rounded-lg p-4 hover:shadow-md transition"
+                  className="border border-white/10 bg-neutral-800 text-neutral-100 placeholder-neutral-500 rounded-lg p-4 hover:shadow-md transition"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900">{project.title}</h3>
+                    <h3 className="font-semibold text-neutral-100">{project.title}</h3>
                     <span className={`text-xs px-2 py-1 rounded ${
-                      project.status === 'draft' ? 'bg-gray-100 text-gray-600' :
-                      project.status === 'seeking' ? 'bg-green-100 text-green-700' :
-                      project.status === 'active' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                      project.status === 'draft' ? 'bg-white/10 text-neutral-400' :
+                      project.status === 'seeking' ? 'bg-green-500/10 text-green-400' :
+                      project.status === 'active' ? 'bg-blue-500/10 text-blue-400' : 'bg-yellow-500/10 text-yellow-400'
                     }`}>
                       {project.status}
                     </span>
                   </div>
-                  <p className="text-gray-500 text-sm line-clamp-2 mb-3">{project.description}</p>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <p className="text-neutral-500 text-sm line-clamp-2 mb-3">{project.description}</p>
+                  <div className="flex items-center text-sm text-neutral-500">
                     <Users className="w-4 h-4 mr-1" />
                     {plural(project.members?.length || 0, 'member')}
                     {project.github_repo_url && (
-                      <span className="ml-3 text-violet-600">GitHub linked</span>
+                      <span className="ml-3 text-orange-400">GitHub linked</span>
                     )}
                   </div>
                 </Link>
@@ -129,14 +129,14 @@ export default function DashboardPage() {
 
 function StatCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: number }) {
   return (
-    <div className="bg-white rounded-xl border p-4">
+    <div className="bg-neutral-900 rounded-xl border border-white/10 p-4">
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
-          <Icon className="w-5 h-5 text-violet-600" />
+        <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center">
+          <Icon className="w-5 h-5 text-orange-400" />
         </div>
         <div>
-          <div className="text-2xl font-bold text-gray-900">{value}</div>
-          <div className="text-sm text-gray-500">{label}</div>
+          <div className="text-2xl font-bold text-neutral-100">{value}</div>
+          <div className="text-sm text-neutral-500">{label}</div>
         </div>
       </div>
     </div>

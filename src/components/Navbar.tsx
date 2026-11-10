@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Rocket, Menu, X, LogOut, User as UserIcon, Plus } from 'lucide-react';
+import { Menu, X, LogOut, User as UserIcon, Plus } from 'lucide-react';
 import type { User } from '@/types';
 import { isSupabaseConfigured } from '@/lib/config';
 import { fetchJson } from '@/lib/fetch-json';
@@ -25,7 +25,7 @@ export function Navbar() {
   }
 
   const linkClass = (href: string) =>
-    `text-sm font-medium transition-colors ${pathname?.startsWith(href) ? 'text-violet-700' : 'text-gray-600 hover:text-gray-900'}`;
+    `text-sm font-medium transition-colors ${pathname?.startsWith(href) ? 'text-orange-300' : 'text-neutral-400 hover:text-white'}`;
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -38,9 +38,9 @@ export function Navbar() {
   if (isAuthPage) return null;
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
+    <nav className="sticky top-0 z-40 border-b border-white/10 bg-neutral-950/80 backdrop-blur">
       {!isSupabaseConfigured && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs sm:text-sm text-center px-4 py-1.5">
+        <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 text-xs sm:text-sm text-center px-4 py-1.5">
           <strong className="font-semibold">Demo mode</strong>{' · '}Supabase is not configured, so you are seeing sample data. Sign-in and edits are disabled.
         </div>
       )}
@@ -48,8 +48,8 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <Rocket className="w-8 h-8 text-violet-600" />
-              <span className="text-xl font-bold text-gray-900">OpenForge</span>
+              <span className="of-mark" />
+              <span className="text-xl font-bold text-neutral-100">OpenForge</span>
             </Link>
           </div>
 
@@ -72,7 +72,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/create"
-                  className="flex items-center space-x-1 bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700"
+                  className="flex items-center space-x-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-500"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create Project</span>
@@ -86,14 +86,14 @@ export function Navbar() {
                         className="w-8 h-8 rounded-full"
                       />
                     ) : (
-                      <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">
-                        <UserIcon className="w-4 h-4 text-violet-600" />
+                      <div className="w-8 h-8 bg-orange-500/10 rounded-full flex items-center justify-center">
+                        <UserIcon className="w-4 h-4 text-orange-400" />
                       </div>
                     )}
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-neutral-500 hover:text-neutral-300"
                     aria-label="Log out"
                   >
                     <LogOut className="w-5 h-5" />
@@ -103,7 +103,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/api/auth/github"
-                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-500"
               >
                 Sign in with GitHub
               </Link>
@@ -113,7 +113,7 @@ export function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600"
+              className="text-neutral-400"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
             >
@@ -124,26 +124,26 @@ export function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden border-t bg-white px-4 py-4 space-y-4">
-          <Link href="/explore" className="block text-gray-600">
+        <div className="md:hidden border-t border-white/10 bg-neutral-900 px-4 py-4 space-y-4">
+          <Link href="/explore" className="block text-neutral-400">
             Explore
           </Link>
           {user ? (
             <>
-              <Link href="/dashboard" className="block text-gray-600">
+              <Link href="/dashboard" className="block text-neutral-400">
                 Dashboard
               </Link>
-              <Link href="/create" className="block text-violet-600 font-medium">
+              <Link href="/create" className="block text-orange-400 font-medium">
                 Create Project
               </Link>
-              <button onClick={handleLogout} className="block text-gray-600">
+              <button onClick={handleLogout} className="block text-neutral-400">
                 Logout
               </button>
             </>
           ) : (
             <Link
               href="/api/auth/github"
-              className="block bg-gray-900 text-white text-center px-4 py-2 rounded-lg"
+              className="block bg-orange-600 text-white text-center px-4 py-2 rounded-lg"
             >
               Sign in with GitHub
             </Link>
