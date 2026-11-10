@@ -1,7 +1,7 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 async function isMember(userId: string, projectId: string): Promise<boolean> {
-  const { count } = await supabase
+  const { count } = await supabaseAdmin
     .from('project_members')
     .select('user_id', { count: 'exact', head: true })
     .eq('project_id', projectId)
@@ -11,7 +11,7 @@ async function isMember(userId: string, projectId: string): Promise<boolean> {
 
 /** True if the user owns the project or is a member of it. */
 export async function canEditProject(userId: string, projectId: string): Promise<boolean> {
-  const { data: project } = await supabase
+  const { data: project } = await supabaseAdmin
     .from('projects')
     .select('owner_id')
     .eq('id', projectId)
@@ -26,7 +26,7 @@ export async function canEditProject(userId: string, projectId: string): Promise
  * to everyone, private ones only to the owner and members. `viewerId` may be null.
  */
 export async function canViewProject(viewerId: string | null, projectId: string): Promise<boolean> {
-  const { data: project } = await supabase
+  const { data: project } = await supabaseAdmin
     .from('projects')
     .select('owner_id, is_public')
     .eq('id', projectId)

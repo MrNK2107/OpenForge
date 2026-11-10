@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { PUBLIC_USER_COLUMNS, USER_ROLES } from '@/lib/authz';
 
@@ -23,7 +23,7 @@ export async function PATCH(request: Request) {
     ? body.roles.filter((r: unknown): r is string => typeof r === 'string' && (USER_ROLES as readonly string[]).includes(r))
     : undefined;
 
-  const { data: user, error } = await supabase
+  const { data: user, error } = await supabaseAdmin
     .from('users')
     .update({
       bio,
@@ -40,18 +40,18 @@ export async function PATCH(request: Request) {
   }
 
   if (skills && Array.isArray(skills)) {
-    const { data: tagRecords } = await supabase
+    const { data: tagRecords } = await supabaseAdmin
       .from('tags')
       .select('id')
       .in('name', skills);
 
     if (tagRecords) {
-      await supabase
+      await supabaseAdmin
         .from('user_skills')
         .delete()
         .eq('user_id', userId);
 
-      await supabase
+      await supabaseAdmin
         .from('user_skills')
         .insert(
           tagRecords.map((tag: { id: string }) => ({

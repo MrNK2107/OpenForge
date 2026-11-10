@@ -17,9 +17,9 @@ vi.mock('next/headers', () => ({
 }));
 
 let fake = createFakeSupabase();
-vi.mock('@/lib/supabase', () => ({
+vi.mock('@/lib/supabase-admin', () => ({
   isSupabaseConfigured: true,
-  get supabase() {
+  get supabaseAdmin() {
     return fake.client;
   },
 }));
@@ -130,6 +130,14 @@ describe('GET /api/auth/github/callback', () => {
     expect(readSessionUserId(store)).toBe(fake.tables.users[0].id);
     expect(jar.get(SESSION_COOKIE)!.value).toBeTruthy();
     expect(jar.has(OAUTH_COOKIE)).toBe(false);
+
+    // Token isolation: the token lands in user_github_tokens, never on the users row.
+    expect(fake.tables.user_github_tokens).toHaveLength(1);
+    expect(fake.tables.user_github_tokens[0]).toMatchObject({
+      user_id: fake.tables.users[0].id,
+      token: 'gho_test',
+    });
+    expect(fake.tables.users[0]).not.toHaveProperty('github_access_token');
 
     // Replay of the same callback URL fails.
     fetchMock.mockClear();

@@ -10,9 +10,9 @@ vi.mock('next/headers', () => ({
 }));
 
 const single = vi.fn();
-vi.mock('@/lib/supabase', () => ({
+vi.mock('@/lib/supabase-admin', () => ({
   isSupabaseConfigured: true,
-  supabase: {
+  supabaseAdmin: {
     from: () => ({ select: () => ({ eq: (_c: string, id: string) => ({ single: () => single(id) }) }) }),
   },
 }));

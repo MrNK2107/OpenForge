@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_MODE_ERROR } from '@/lib/demo-data';
 
 
@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { data: notifications, error } = await supabase
+  const { data: notifications, error } = await supabaseAdmin
     .from('notifications')
     .select('*')
     .eq('user_id', userId)
@@ -36,7 +36,7 @@ export async function PATCH(request: Request) {
 
   const { id, read } = await request.json();
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('notifications')
     .update({ read })
     .eq('id', id)

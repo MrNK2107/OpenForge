@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
 import { canEditProject, canViewProject } from '@/lib/authz';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_TASKS, DEMO_MODE_ERROR } from '@/lib/demo-data';
 
 
@@ -15,7 +15,7 @@ export async function GET(
     return NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
 
-  const { data: tasks, error } = await supabase
+  const { data: tasks, error } = await supabaseAdmin
     .from('tasks')
     .select(`
       *,
@@ -49,7 +49,7 @@ export async function POST(
   const body = await request.json();
   const { title, description, status, difficulty, labels, assignee_id, effort_estimate } = body;
 
-  const { data: task, error } = await supabase
+  const { data: task, error } = await supabaseAdmin
     .from('tasks')
     .insert({
       project_id: id,
@@ -102,7 +102,7 @@ export async function PUT(
   if (assignee_id) updates.assignee_id = assignee_id;
   if (effort_estimate) updates.effort_estimate = effort_estimate;
 
-  const { data: task, error } = await supabase
+  const { data: task, error } = await supabaseAdmin
     .from('tasks')
     .update(updates)
     .eq('id', taskId)

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { demoProjectsFiltered, DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { normalizeProject } from '@/lib/normalize';
 
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10) || 0, 0);
   const owner = searchParams.get('owner');
 
-  let query = supabase
+  let query = supabaseAdmin
     .from('projects')
     .select(`
       *,
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
 
   const projectsWithStars = await Promise.all(
     (projects as Record<string, unknown>[]).map(async (project: Record<string, unknown>) => {
-      const { count } = await supabase
+      const { count } = await supabaseAdmin
         .from('project_stars')
         .select('*', { count: 'exact', head: true })
         .eq('project_id', project.id);
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       tags = [],
     } = body;
 
-    const { data: project, error } = await supabase
+    const { data: project, error } = await supabaseAdmin
       .from('projects')
       .insert({
         owner_id: userId,
@@ -115,13 +115,13 @@ export async function POST(request: Request) {
     }
 
     if (tags.length > 0) {
-      const { data: tagRecords } = await supabase
+      const { data: tagRecords } = await supabaseAdmin
         .from('tags')
         .select('id')
         .in('name', tags);
 
       if (tagRecords) {
-        await supabase
+        await supabaseAdmin
           .from('project_tags')
           .insert(
             tagRecords.map((tag: { id: string }) => ({
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { data: owner } = await supabase
+    const { data: owner } = await supabaseAdmin
       .from('users')
       .select('id, username, avatar_url')
       .eq('id', userId)

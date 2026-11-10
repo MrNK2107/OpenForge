@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_TAGS } from '@/lib/demo-data';
 
 
 export async function GET() {
   if (!isSupabaseConfigured) return NextResponse.json(DEMO_TAGS);
-  const { data: tags, error } = await supabase
+  const { data: tags, error } = await supabaseAdmin
     .from('tags')
     .select('*')
     .order('name');

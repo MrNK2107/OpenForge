@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { getSessionUserId } from '@/lib/session';
 import { DEMO_PROJECTS, DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { normalizeProject } from '@/lib/normalize';
@@ -15,7 +15,7 @@ export async function GET(
     return demo ? NextResponse.json(normalizeProject(demo)) : NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
   
-  const { data: project, error } = await supabase
+  const { data: project, error } = await supabaseAdmin
     .from('projects')
     .select(`
       *,
@@ -35,7 +35,7 @@ export async function GET(
     return NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
 
-  const { count } = await supabase
+  const { count } = await supabaseAdmin
     .from('project_stars')
     .select('*', { count: 'exact', head: true })
     .eq('project_id', id);
@@ -59,7 +59,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
   }
 
-  const { data: project, error } = await supabase
+  const { data: project, error } = await supabaseAdmin
     .from('projects')
     .update({
       title: body.title,
@@ -95,7 +95,7 @@ export async function DELETE(
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('projects')
     .update({ status: 'archived' })
     .eq('id', id)

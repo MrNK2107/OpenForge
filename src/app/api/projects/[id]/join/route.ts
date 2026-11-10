@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_MODE_ERROR } from '@/lib/demo-data';
 
 
@@ -16,7 +16,7 @@ export async function POST(
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { data: project } = await supabase
+  const { data: project } = await supabaseAdmin
     .from('projects')
     .select('owner_id, is_public, status')
     .eq('id', id)
@@ -31,7 +31,7 @@ export async function POST(
   if (project.status === 'archived') {
     return NextResponse.json({ error: 'Project is archived' }, { status: 400 });
   }
-  const { count: pending } = await supabase
+  const { count: pending } = await supabaseAdmin
     .from('join_requests')
     .select('id', { count: 'exact', head: true })
     .eq('project_id', id)
@@ -44,7 +44,7 @@ export async function POST(
   const body = await request.json().catch(() => ({}));
   const message = typeof body?.message === 'string' ? body.message.slice(0, 2000) : null;
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('join_requests')
     .insert({
       project_id: id,

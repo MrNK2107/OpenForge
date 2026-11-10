@@ -43,13 +43,14 @@ If `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set, the
 
 ### Full mode
 
-1. Create a Supabase project and run `supabase/schema.sql` in the SQL editor.
+1. Create a Supabase project and run `supabase/schema.sql` in the SQL editor. Upgrading an existing database? Run `supabase/migrations/2026-11-10_security_lockdown.sql` instead — it moves GitHub tokens into an isolated table and locks RLS down. Treat old tokens as compromised: revoke them in your GitHub OAuth app settings and have users sign in again.
 2. Create a GitHub OAuth app with callback URL `http://localhost:3000/api/auth/github/callback`.
 3. Copy `.env.example` to `.env.local` and fill it in:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+SUPABASE_SERVICE_ROLE_KEY=<service_role key>   # server-only, never NEXT_PUBLIC_
 GITHUB_CLIENT_ID=<oauth app client id>
 GITHUB_CLIENT_SECRET=<oauth app client secret>
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -57,6 +58,8 @@ SESSION_SECRET=<random, >= 32 chars, e.g. `openssl rand -hex 32`>
 ```
 
 Sessions use an HMAC-signed, httpOnly `of_session` cookie (30-day expiry). `SESSION_SECRET` is required in production (signed-in requests fail closed without it). In development a random secret is generated at startup with a warning, so sessions reset on restart.
+
+**Security model.** Identity is our own GitHub OAuth flow, not Supabase Auth, so `auth.uid()` is always NULL. Every API route enforces authorization (`src/lib/authz.ts`) and then talks to Postgres with the server-only service-role key. RLS makes the public anon key harmless: read-only access to public profiles, public projects and tags — no writes, nothing else. GitHub access tokens live in `user_github_tokens` (RLS enabled, no policies: service role only) and never reach the browser.
 
 ### 3D hero asset
 

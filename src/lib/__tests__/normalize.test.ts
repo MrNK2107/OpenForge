@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { flattenTags, normalizeProject } from '../normalize';
-import { hasSupabaseConfig } from '../supabase';
+import { hasSupabaseConfig } from '../config';
 import { DEMO_PROJECTS, demoProjectsFiltered } from '../demo-data';
 
 describe('flattenTags / normalizeProject', () => {

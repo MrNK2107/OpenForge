@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabaseAdmin } from './supabase-admin';
 
 export interface UserSkills {
   userId: string;
@@ -149,18 +149,18 @@ export function rankProjectsForUser(
 }
 
 export async function getMatchesForUser(userId: string, limit = 10) {
-  const { data: userSkills } = await supabase
+  const { data: userSkills } = await supabaseAdmin
     .from('user_skills')
     .select('tag:tags(name)')
     .eq('user_id', userId);
 
-  const { data: user } = await supabase
+  const { data: user } = await supabaseAdmin
     .from('users')
     .select('availability')
     .eq('id', userId)
     .single();
 
-  const { data: projects } = await supabase
+  const { data: projects } = await supabaseAdmin
     .from('projects')
     .select('*, tags:project_tags(tag:tags(name)), roles_needed:project_roles_needed(role_name, filled)')
     .eq('is_public', true)

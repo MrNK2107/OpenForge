@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
 import { getMatchesForUser } from '@/lib/matching';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_PROJECTS, DEMO_USER_ID, DEMO_USER_SKILLS, DEMO_USER_AVAILABILITY } from '@/lib/demo-data';
 import { rankProjectsForUser } from '@/lib/matching';
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_MODE_ERROR } from '@/lib/demo-data';
 
 import { generateRepoFiles } from '@/lib/repo-templates';
@@ -17,17 +17,28 @@ export async function POST(
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { data: user } = await supabase
+  const { data: user } = await supabaseAdmin
     .from('users')
-    .select('github_access_token, username')
+    .select('username')
     .eq('id', userId)
     .single();
 
-  if (!user?.github_access_token) {
-    return NextResponse.json({ error: 'No GitHub token found' }, { status: 400 });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  const { data: project } = await supabase
+  const { data: tokenRow } = await supabaseAdmin
+    .from('user_github_tokens')
+    .select('token')
+    .eq('user_id', userId)
+    .single();
+
+  if (!tokenRow?.token) {
+    return NextResponse.json({ error: 'No GitHub token found' }, { status: 400 });
+  }
+  const githubToken = tokenRow.token;
+
+  const { data: project } = await supabaseAdmin
     .from('projects')
     .select('*, tags:project_tags(tag:tags(name))')
     .eq('id', id)
@@ -52,7 +63,7 @@ export async function POST(
     const repoResponse = await fetch('https://api.github.com/user/repos', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${user.github_access_token}`,
+        Authorization: `Bearer ${githubToken}`,
         'Content-Type': 'application/json',
         Accept: 'application/vnd.github+json',
       },
@@ -75,7 +86,7 @@ export async function POST(
       await fetch(`https://api.github.com/repos/${user.username}/${slug}/contents/${path}`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${user.github_access_token}`,
+          Authorization: `Bearer ${githubToken}`,
           'Content-Type': 'application/json',
           Accept: 'application/vnd.github+json',
         },
@@ -90,7 +101,7 @@ export async function POST(
       await fetch(`https://api.github.com/repos/${user.username}/${slug}/issues`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${user.github_access_token}`,
+          Authorization: `Bearer ${githubToken}`,
           'Content-Type': 'application/json',
           Accept: 'application/vnd.github+json',
         },
@@ -101,7 +112,7 @@ export async function POST(
       });
     }
 
-    await supabase
+    await supabaseAdmin
       .from('projects')
       .update({
         github_repo_url: repoData.html_url,

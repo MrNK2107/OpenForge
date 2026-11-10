@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { writeSessionCookie } from '@/lib/session';
 import { consumeOAuth } from '@/lib/oauth-state';
 
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
       email = (Array.isArray(emails) ? emails : []).find((e: { primary: boolean }) => e.primary)?.email;
     }
 
-    const { data: existingUser } = await supabase
+    const { data: existingUser } = await supabaseAdmin
       .from('users')
       .select('id')
       .eq('github_id', userData.id)
@@ -83,27 +83,25 @@ export async function GET(request: Request) {
     let userId: string;
 
     if (existingUser) {
-      await supabase
+      await supabaseAdmin
         .from('users')
         .update({
           username: userData.login,
           email,
           avatar_url: userData.avatar_url,
-          github_access_token: accessToken,
           updated_at: new Date().toISOString(),
         })
         .eq('github_id', userData.id);
 
       userId = existingUser.id;
     } else {
-      const { data: newUser, error: insertError } = await supabase
+      const { data: newUser, error: insertError } = await supabaseAdmin
         .from('users')
         .insert({
           github_id: userData.id,
           username: userData.login,
           email,
           avatar_url: userData.avatar_url,
-          github_access_token: accessToken,
           roles: ['contributor'],
         })
         .select('id')
@@ -120,8 +118,19 @@ export async function GET(request: Request) {
       userId = newUser.id;
     }
 
-    // Signed, httpOnly session. The GitHub token stays server-side (users table);
-    // it is no longer mirrored into a cookie.
+    // user_github_tokens has RLS enabled and no policies: only the service role can read it.
+    const { error: tokenError } = await supabaseAdmin
+      .from('user_github_tokens')
+      .upsert(
+        { user_id: userId, token: accessToken, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      );
+    if (tokenError) {
+      console.error('Error storing GitHub token:', tokenError);
+      return NextResponse.redirect(`${APP_URL}/?error=auth_failed`);
+    }
+
+    // Signed, httpOnly session. The GitHub token never reaches the browser.
     writeSessionCookie(cookieStore, userId);
     cookieStore.delete('github_token');
 

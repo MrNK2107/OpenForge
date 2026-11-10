@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { PUBLIC_USER_COLUMNS } from '@/lib/authz';
 
 import type { User } from '@/types';
@@ -13,9 +13,9 @@ export async function GET() {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { data: user, error } = await supabase
+  const { data: user, error } = await supabaseAdmin
     .from('users')
-    .select(PUBLIC_USER_COLUMNS) // never select('*'): users.github_access_token must not reach the browser
+    .select(PUBLIC_USER_COLUMNS) // explicit public columns; the token lives in user_github_tokens (service-role only)
     .eq('id', userId)
     .single();
 

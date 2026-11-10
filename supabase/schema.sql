@@ -4,7 +4,7 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table
+-- Users table (public profiles only; GitHub tokens live in user_github_tokens)
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     github_id INTEGER UNIQUE,
@@ -14,10 +14,18 @@ CREATE TABLE IF NOT EXISTS public.users (
     bio TEXT,
     roles TEXT[] DEFAULT ARRAY['contributor'],
     availability TEXT,
-    github_access_token TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- GitHub access tokens: RLS enabled with NO policies, so only the service role
+-- (used by the Next.js API routes) can read or write them. Never expose this table.
+CREATE TABLE IF NOT EXISTS public.user_github_tokens (
+    user_id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.user_github_tokens ENABLE ROW LEVEL SECURITY;
 
 -- Tags table
 CREATE TABLE IF NOT EXISTS public.tags (
@@ -147,50 +155,33 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(use
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON public.notifications(read);
 CREATE INDEX IF NOT EXISTS idx_join_requests_project_id ON public.join_requests(project_id);
 
--- Enable Row Level Security (RLS)
+-- Row Level Security
+-- The app uses its own GitHub OAuth + signed sessions, NOT Supabase Auth, so
+-- auth.uid() is always NULL. All reads and writes go through the Next.js API
+-- routes using the service-role key (which bypasses RLS); authorization is
+-- enforced there (src/lib/authz.ts). RLS exists only to make the public anon
+-- key harmless: read-only access to public data, no writes, nothing else.
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.project_roles_needed ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_stars ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.join_requests ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for users
-CREATE POLICY "Public users are viewable by everyone" ON public.users
+-- Anon: SELECT on public data only. Tables without policies are service-role only.
+CREATE POLICY "Public profiles are viewable by everyone" ON public.users
     FOR SELECT USING (true);
 
-CREATE POLICY "Users can update their own profile" ON public.users
-    FOR UPDATE USING (auth.uid() = id);
-
--- RLS Policies for projects
 CREATE POLICY "Public projects are viewable by everyone" ON public.projects
     FOR SELECT USING (is_public = true);
 
-CREATE POLICY "Users can insert their own projects" ON public.projects
-    FOR INSERT WITH CHECK (auth.uid() = owner_id);
-
-CREATE POLICY "Owners can update their projects" ON public.projects
-    FOR UPDATE USING (auth.uid() = owner_id);
-
--- RLS Policies for tasks
-CREATE POLICY "Project tasks are viewable by project members" ON public.tasks
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM public.project_members
-            WHERE project_members.project_id = tasks.project_id
-            AND project_members.user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Contributors can insert tasks" ON public.tasks
-    FOR INSERT WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.project_members
-            WHERE project_members.project_id = tasks.project_id
-            AND project_members.user_id = auth.uid()
-        )
-    );
+CREATE POLICY "Tags are viewable by everyone" ON public.tags
+    FOR SELECT USING (true);
 
 -- Insert default tags
 INSERT INTO public.tags (name, category, color) VALUES

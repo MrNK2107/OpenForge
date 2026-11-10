@@ -11,9 +11,9 @@ vi.mock('next/headers', () => ({
 }));
 
 let fake = createFakeSupabase();
-vi.mock('@/lib/supabase', () => ({
+vi.mock('@/lib/supabase-admin', () => ({
   isSupabaseConfigured: true,
-  get supabase() {
+  get supabaseAdmin() {
     return fake.client;
   },
 }));
@@ -41,9 +41,14 @@ const req = (method: string, body?: unknown) =>
 beforeEach(() => {
   fake = createFakeSupabase({
     users: [
-      { id: 'owner', username: 'o', github_access_token: 'gho_owner', roles: ['contributor'] },
-      { id: 'member', username: 'm', github_access_token: 'gho_member' },
-      { id: 'stranger', username: 's', github_access_token: 'gho_stranger' },
+      { id: 'owner', username: 'o', roles: ['contributor'] },
+      { id: 'member', username: 'm' },
+      { id: 'stranger', username: 's' },
+    ],
+    user_github_tokens: [
+      { user_id: 'owner', token: 'gho_owner' },
+      { user_id: 'member', token: 'gho_member' },
+      { user_id: 'stranger', token: 'gho_stranger' },
     ],
     projects: [
       { id: 'priv', owner_id: 'owner', title: 'Secret', is_public: false, status: 'active' },

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUserId } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase-admin';
 import { DEMO_MODE_ERROR } from '@/lib/demo-data';
 import { canViewProject } from '@/lib/authz';
 
@@ -21,7 +21,7 @@ export async function POST(
     return NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('project_stars')
     .upsert({ user_id: userId, project_id: id }, { onConflict: 'user_id,project_id' });
 

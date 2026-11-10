@@ -1,6 +1,8 @@
 # Design note: how the server talks to Supabase
 
-Status: **proposal, not implemented** (night run 2026-10-31). The decision is logged in `_night_run/2026-10-31/NEEDS_INPUT.md`.
+Status: **implemented** (2026-11-10) — option A + token isolation, as recommended below. `src/lib/supabase-admin.ts` (server-only) is used by every API route; tokens live in `user_github_tokens`; `supabase/schema.sql` and `supabase/migrations/2026-11-10_security_lockdown.sql` lock anon down to read-only public data. Remaining operational step: apply the migration to the live DB and rotate existing GitHub tokens.
+
+Original decision logged in `_night_run/2026-10-31/NEEDS_INPUT.md`.
 
 ## Current state
 
